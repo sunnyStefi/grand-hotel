@@ -145,8 +145,8 @@ function _drawCoin(ctx, cx, cy, r, frame) {
   ctx.fill();
 
   if (squish > 0.5) {
-    ctx.fillStyle = P.GOLD_LT;
-    ctx.font = `bold ${Math.floor(r * 1.1)}px monospace`;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${Math.floor(r * 1.4)}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('$', 0, 0);
@@ -588,11 +588,11 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
     ctx.fillText(floorText, W / 2, 8);
   }
 
-  // Title watermark
-  ctx.fillStyle = 'rgba(245,200,66,0.5)';
-  ctx.font = '5px monospace';
-  ctx.textAlign = 'right';
-  ctx.fillText('GRAND HOTEL GOLD', W - muteW2 - inflW2 - 8, 8);
+  // Title watermark (next to coins on the left)
+  ctx.fillStyle = P.GOLD_LT;
+  ctx.font = 'bold 7px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('GRAND HOTEL GOLD', mw + 6, 8);
 
   // Mute badge
   ctx.font = '7px monospace';

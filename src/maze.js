@@ -53,10 +53,71 @@ const TEMPLATES = [
   ],
 ];
 
+/**
+ * Find floor cells suitable for adding a new door junction.
+ * Must be a FLOOR tile, not the spawn cell (1,1), with ≥2 floor neighbors,
+ * and not adjacent to an existing DOOR_JUNCTION.
+ */
+function findJunctionCandidates(maze) {
+  const candidates = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (maze[r][c] !== FLOOR) continue;
+      if (r === 1 && c === 1) continue;
+      let nearD = false;
+      let floorNeighbors = 0;
+      for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+        const nr = r + dr, nc = c + dc;
+        if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+        if (maze[nr][nc] === DOOR_JUNCTION) nearD = true;
+        if (maze[nr][nc] === FLOOR || maze[nr][nc] === STASH) floorNeighbors++;
+      }
+      if (!nearD && floorNeighbors >= 2) candidates.push({r, c});
+    }
+  }
+  // Shuffle
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+  return candidates;
+}
+
 export function createFloor(floorNumber) {
   const template = TEMPLATES[(floorNumber - 1) % TEMPLATES.length];
   // Deep copy so mutations don't affect the template
-  return template.map(row => [...row]);
+  const maze = template.map(row => [...row]);
+
+  // --- Progressive difficulty per floor cycle ---
+  // Every 3 floors (1 TEMPLATES cycle) the maze gets a bit tougher
+  const cycle = Math.floor((floorNumber - 1) / TEMPLATES.length);
+
+  // Extra door junctions (more math to solve)
+  const extraJunctions = Math.min(cycle, 3);
+  if (extraJunctions > 0) {
+    const candidates = findJunctionCandidates(maze);
+    for (let i = 0; i < Math.min(extraJunctions, candidates.length); i++) {
+      maze[candidates[i].r][candidates[i].c] = DOOR_JUNCTION;
+    }
+  }
+
+  // Fewer coin stashes on higher cycles
+  const stashesToRemove = Math.min(Math.max(0, cycle - 1), 2);
+  if (stashesToRemove > 0) {
+    const stashCells = [];
+    for (let r = 0; r < ROWS; r++)
+      for (let c = 0; c < COLS; c++)
+        if (maze[r][c] === STASH) stashCells.push({r, c});
+    for (let i = stashCells.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [stashCells[i], stashCells[j]] = [stashCells[j], stashCells[i]];
+    }
+    for (let i = 0; i < Math.min(stashesToRemove, stashCells.length); i++) {
+      maze[stashCells[i].r][stashCells[i].c] = FLOOR;
+    }
+  }
+
+  return maze;
 }
 
 export const COLS = 20;
