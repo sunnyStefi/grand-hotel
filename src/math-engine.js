@@ -1,24 +1,32 @@
-export const TIER_10 = 'TIER_10';
-export const TIER_15 = 'TIER_15';
-export const TIER_20 = 'TIER_20';
+export const TIER_1 = 'TIER_1';
+export const TIER_2 = 'TIER_2';
+export const TIER_3 = 'TIER_3';
 
-const TIER_RANGES = {
-  [TIER_10]: { min: 2,  max: 10 },
-  [TIER_15]: { min: 11, max: 15 },
-  [TIER_20]: { min: 16, max: 20 },
+const TIER_CONFIGS = {
+  [TIER_1]: { min: 2, max: 8,  allowSub: false },
+  [TIER_2]: { min: 4, max: 12, allowSub: true  },
+  [TIER_3]: { min: 8, max: 16, allowSub: true  },
 };
-const TIER_ORDER = [TIER_10, TIER_15, TIER_20];
+const TIER_ORDER = [TIER_1, TIER_2, TIER_3];
 
 function randInt(lo, hi) {
   return Math.floor(lo + Math.random() * (hi - lo + 1));
 }
 
-export function generateSum(tier) {
-  const { min, max } = TIER_RANGES[tier];
-  const answer = randInt(min, max);
-  const a = randInt(1, answer - 1);
-  const b = answer - a;
-  return { a, b, answer };
+export function generateProblem(tier) {
+  const cfg = TIER_CONFIGS[tier];
+  if (cfg.allowSub && Math.random() < 0.4) {
+    // Subtraction
+    const a = randInt(cfg.min, cfg.max);
+    const b = randInt(1, Math.max(a - 1, 1));
+    return { a, b, operator: '−', answer: a - b };
+  } else {
+    // Addition
+    const answer = randInt(cfg.min, cfg.max);
+    const a = randInt(1, answer - 1);
+    const b = answer - a;
+    return { a, b, operator: '+', answer };
+  }
 }
 
 export function generateDecoys(answer, count) {

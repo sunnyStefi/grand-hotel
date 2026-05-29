@@ -1,5 +1,5 @@
 import { createFloor, WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, DOWN_LIFT, CELL_SIZE, COLS, ROWS } from './maze.js';
-import { generateSum, generateDecoys, updateTier, TIER_10 } from './math-engine.js';
+import { generateProblem, generateDecoys, updateTier, TIER_1, TIER_2, TIER_3 } from './math-engine.js';
 import { getInput, getInputJustPressed, consumeSpacePress, consumeEnterPress, consumeNavUp, consumeNavDown } from './input.js';
 import { initAudio, playSfx, setMuted, isMuted } from './audio.js';
 import { saveState, loadState } from './storage.js';
@@ -71,7 +71,7 @@ function defaultState() {
     INFLATION_INTERVAL: 2500,
 
     // Difficulty
-    tier: TIER_10,
+    tier: TIER_1,
 
     // Hotel
     hotel: { rooms: 0, floors: 1, stars: 1 },
@@ -115,7 +115,14 @@ if (saved) {
   state.currentFloor = saved.highestFloor || 1;
   state.hotel = saved.hotel || state.hotel;
   if (saved.difficulty) {
-    state.tier = saved.difficulty.tier || TIER_10;
+    // Migrate old tier names
+    const tier = saved.difficulty.tier;
+    const validTiers = [TIER_1, TIER_2, TIER_3];
+    if (tier === 'TIER_10') state.tier = TIER_1;
+    else if (tier === 'TIER_15') state.tier = TIER_2;
+    else if (tier === 'TIER_20') state.tier = TIER_3;
+    else if (validTiers.includes(tier)) state.tier = tier;
+    else state.tier = TIER_1;
     state.recentAnswers = saved.difficulty.recentAnswers || [];
   }
   state.stats = saved.stats || state.stats;
@@ -215,7 +222,7 @@ function activateJunction(row, col) {
   if (state.activeJunction) return;
   state.activeJunction = { row, col };
   state.junctionStartTime = performance.now();
-  state.currentSum = generateSum(state.tier);
+  state.currentSum = generateProblem(state.tier);
 
 
   // Place answer doors on adjacent FLOOR cells

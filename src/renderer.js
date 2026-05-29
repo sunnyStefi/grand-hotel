@@ -403,7 +403,7 @@ export function drawSumBanner(ctx, junction, sum, maze, floorNum = 1) {
   const offset = isHorizontal ? 3 : 4;
   const cy = junction.row * CELL_SIZE + (offset * CELL_SIZE);
 
-  const text = `${sum.a} + ${sum.b} = ?`;
+  const text = `${sum.a} ${sum.operator} ${sum.b} = ?`;
   ctx.font = 'bold 12px monospace';
   const pad = 7;
   const tw = ctx.measureText(text).width;
