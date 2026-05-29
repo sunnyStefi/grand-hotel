@@ -1,41 +1,108 @@
 import { WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, CELL_SIZE } from './maze.js';
 import { isMuted } from './audio.js';
-import { PALETTE, drawSprite, BELLHOP_SPRITES } from './sprites.js';
+import { PALETTE, drawSprite, BELLHOP_SPRITES, getCatSpritesForFloor } from './sprites.js';
 
 const P = PALETTE;
 
-// ─── Wallpaper pattern (init once) ───────────────────────────────────────────
-let wallpaperPattern = null;
+// ─── Wallpaper patterns (per floor) ───────────────────────────────────────────
+let wallpaperPatterns = {};
 
-function buildWallpaperPattern(ctx) {
+function buildWallpaperPatterns(ctx) {
   const size = 16;
-  const oc = document.createElement('canvas');
-  oc.width = size; oc.height = size;
-  const ox = oc.getContext('2d');
 
-  ox.fillStyle = P.NAVY;
-  ox.fillRect(0, 0, size, size);
+  // Floor 1: Classic brick with warm browns
+  {
+    const oc = document.createElement('canvas');
+    oc.width = size; oc.height = size;
+    const ox = oc.getContext('2d');
+    ox.fillStyle = '#8B4513';
+    ox.fillRect(0, 0, size, size);
+    // Brick pattern - horizontal line every 8px
+    ox.strokeStyle = '#654321';
+    ox.lineWidth = 0.5;
+    ox.beginPath();
+    ox.moveTo(0, size / 2);
+    ox.lineTo(size, size / 2);
+    ox.stroke();
+    // Vertical brick divider
+    ox.beginPath();
+    ox.moveTo(size / 2, 0);
+    ox.lineTo(size / 2, size / 2);
+    ox.stroke();
+    ox.beginPath();
+    ox.moveTo(size / 2, size / 2);
+    ox.lineTo(size / 2, size);
+    ox.stroke();
+    // Shading
+    ox.fillStyle = 'rgba(0,0,0,0.15)';
+    ox.fillRect(0, size / 2 - 0.5, size, 1);
+    wallpaperPatterns[1] = ctx.createPattern(oc, 'repeat');
+  }
 
-  // Diamond outline
-  ox.strokeStyle = P.WALL_MID;
-  ox.lineWidth = 0.5;
-  ox.beginPath();
-  ox.moveTo(size / 2, 0);
-  ox.lineTo(size, size / 2);
-  ox.lineTo(size / 2, size);
-  ox.lineTo(0, size / 2);
-  ox.closePath();
-  ox.stroke();
+  // Floor 2: Teal/turquoise with decorative dots
+  {
+    const oc = document.createElement('canvas');
+    oc.width = size; oc.height = size;
+    const ox = oc.getContext('2d');
+    ox.fillStyle = '#2D8A7D';
+    ox.fillRect(0, 0, size, size);
+    // Geometric pattern - circles
+    ox.fillStyle = '#1F5A54';
+    ox.beginPath();
+    ox.arc(size / 2, size / 2, 3, 0, Math.PI * 2);
+    ox.fill();
+    // Corner accents
+    ox.fillStyle = 'rgba(255,255,255,0.1)';
+    ox.fillRect(1, 1, 2, 2);
+    ox.fillRect(size - 3, size - 3, 2, 2);
+    wallpaperPatterns[2] = ctx.createPattern(oc, 'repeat');
+  }
 
-  // Center dot
-  ox.fillStyle = P.WALL_LT;
-  ox.fillRect(size / 2 - 1, size / 2 - 1, 2, 2);
+  // Floor 3: Light blue/modern with subtle texture
+  {
+    const oc = document.createElement('canvas');
+    oc.width = size; oc.height = size;
+    const ox = oc.getContext('2d');
+    ox.fillStyle = '#5DA5D4';
+    ox.fillRect(0, 0, size, size);
+    // Modern diagonal lines
+    ox.strokeStyle = '#4A8BC2';
+    ox.lineWidth = 1;
+    for (let i = 0; i < size * 2; i += 4) {
+      ox.beginPath();
+      ox.moveTo(i, 0);
+      ox.lineTo(i - size, size);
+      ox.stroke();
+    }
+    // Light overlay
+    ox.fillStyle = 'rgba(255,255,255,0.05)';
+    ox.fillRect(0, 0, size, size);
+    wallpaperPatterns[3] = ctx.createPattern(oc, 'repeat');
+  }
 
-  wallpaperPattern = ctx.createPattern(oc, 'repeat');
+  // Floor 4: Purple/lavender with ornate pattern
+  {
+    const oc = document.createElement('canvas');
+    oc.width = size; oc.height = size;
+    const ox = oc.getContext('2d');
+    ox.fillStyle = '#9B6DB4';
+    ox.fillRect(0, 0, size, size);
+    // Ornate cross pattern (fancy)
+    ox.fillStyle = '#7A4F8C';
+    ox.fillRect(size / 2 - 1, 0, 2, size);
+    ox.fillRect(0, size / 2 - 1, size, 2);
+    // Decorative corners
+    ox.fillStyle = '#D4A5E8';
+    ox.fillRect(1, 1, 3, 3);
+    ox.fillRect(size - 4, 1, 3, 3);
+    ox.fillRect(1, size - 4, 3, 3);
+    ox.fillRect(size - 4, size - 4, 3, 3);
+    wallpaperPatterns[4] = ctx.createPattern(oc, 'repeat');
+  }
 }
 
 export function initRenderer(ctx) {
-  buildWallpaperPattern(ctx);
+  buildWallpaperPatterns(ctx);
 }
 
 // ─── Vignette ─────────────────────────────────────────────────────────────────
@@ -53,9 +120,10 @@ export function drawMaze(ctx, maze, doorOverlays, floorNum = 1) {
   const W = maze[0].length * CELL_SIZE;
   const H = maze.length * CELL_SIZE;
 
-  // Wallpaper background
-  if (wallpaperPattern) {
-    ctx.fillStyle = wallpaperPattern;
+  // Wallpaper background (per floor)
+  const floorMod = ((floorNum - 1) % 4) + 1;
+  if (wallpaperPatterns[floorMod]) {
+    ctx.fillStyle = wallpaperPatterns[floorMod];
     ctx.fillRect(0, 0, W, H);
   }
 
@@ -69,16 +137,16 @@ export function drawMaze(ctx, maze, doorOverlays, floorNum = 1) {
       const S = CELL_SIZE;
 
       if (cell === WALL) {
-        _drawWall(ctx, x, y, S, row);
+        _drawWall(ctx, x, y, S, row, floorNum);
       } else if (cell === FLOOR) {
-        _drawFloor(ctx, x, y, S, row, col, floorOffset);
+        _drawFloor(ctx, x, y, S, row, col, floorOffset, floorNum);
       } else if (cell === DOOR_JUNCTION) {
-        _drawFloor(ctx, x, y, S, row, col, floorOffset);
+        _drawFloor(ctx, x, y, S, row, col, floorOffset, floorNum);
         ctx.strokeStyle = P.GOLD;
         ctx.lineWidth = 1;
         ctx.strokeRect(x + 1, y + 1, S - 2, S - 2);
       } else if (cell === STASH) {
-        _drawFloor(ctx, x, y, S, row, col, floorOffset);
+        _drawFloor(ctx, x, y, S, row, col, floorOffset, floorNum);
         // Sparkle stash indicator
         ctx.fillStyle = P.GOLD_LT;
         ctx.beginPath();
@@ -110,33 +178,94 @@ export function drawMaze(ctx, maze, doorOverlays, floorNum = 1) {
   }
 }
 
-function _drawWall(ctx, x, y, S, row) {
-  // Base
-  ctx.fillStyle = P.WALL_MID;
-  ctx.fillRect(x, y, S, S);
-  // Top highlight
-  ctx.fillStyle = P.WALL_LT;
-  ctx.fillRect(x, y, S, 2);
-  ctx.fillRect(x, y, 2, S);
-  // Bottom shadow
-  ctx.fillStyle = P.WALL_DARK;
-  ctx.fillRect(x, y + S - 2, S, 2);
-  ctx.fillRect(x + S - 2, y, 2, S);
-  // Brick mortar lines every 4px
-  ctx.fillStyle = P.WALL_DARK;
-  const brickH = 4;
-  const brickOffset = (row % 2) * (S / 2); // stagger rows
-  for (let my = brickH; my < S; my += brickH) {
-    ctx.fillRect(x, y + my, S, 1);
+function _drawWall(ctx, x, y, S, row, floorNum = 1) {
+  const floorMod = (floorNum - 1) % 4;
+
+  if (floorMod === 0) {
+    // Floor 1: Classic dark brick
+    ctx.fillStyle = '#6B3410';
+    ctx.fillRect(x, y, S, S);
+    ctx.fillStyle = '#8B4513';
+    ctx.fillRect(x, y, S, 2);
+    ctx.fillRect(x, y, 2, S);
+    ctx.fillStyle = '#4A2410';
+    ctx.fillRect(x, y + S - 2, S, 2);
+    ctx.fillRect(x + S - 2, y, 2, S);
+    // Brick pattern
+    ctx.fillStyle = '#5A3110';
+    for (let my = 4; my < S; my += 4) {
+      ctx.fillRect(x, y + my, S, 1);
+    }
+    const vx = ((row % 2) * (S / 2) + S / 2) % S;
+    ctx.fillRect(x + vx, y, 1, S);
+  } else if (floorMod === 1) {
+    // Floor 2: Teal/turquoise modern
+    ctx.fillStyle = '#1F5A54';
+    ctx.fillRect(x, y, S, S);
+    ctx.fillStyle = '#2D8A7D';
+    ctx.fillRect(x, y, S, 2);
+    ctx.fillRect(x, y, 2, S);
+    ctx.fillStyle = '#0F3A34';
+    ctx.fillRect(x, y + S - 2, S, 2);
+    ctx.fillRect(x + S - 2, y, 2, S);
+    // Decorative grid
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillRect(x + S / 2 - 1, y, 2, S);
+    ctx.fillRect(x, y + S / 2 - 1, S, 2);
+  } else if (floorMod === 2) {
+    // Floor 3: Light blue panels
+    ctx.fillStyle = '#4A8BC2';
+    ctx.fillRect(x, y, S, S);
+    ctx.fillStyle = '#5DA5D4';
+    ctx.fillRect(x, y, S, 2);
+    ctx.fillRect(x, y, 2, S);
+    ctx.fillStyle = '#3A6BA2';
+    ctx.fillRect(x, y + S - 2, S, 2);
+    ctx.fillRect(x + S - 2, y, 2, S);
+    // Panel lines
+    ctx.strokeStyle = '#2A5B92';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(x + 2, y + 2, S - 4, S - 4);
+  } else {
+    // Floor 4: Purple ornate
+    ctx.fillStyle = '#7A4F8C';
+    ctx.fillRect(x, y, S, S);
+    ctx.fillStyle = '#9B6DB4';
+    ctx.fillRect(x, y, S, 2);
+    ctx.fillRect(x, y, 2, S);
+    ctx.fillStyle = '#5A3F6C';
+    ctx.fillRect(x, y + S - 2, S, 2);
+    ctx.fillRect(x + S - 2, y, 2, S);
+    // Ornate corners
+    ctx.fillStyle = '#D4A5E8';
+    ctx.fillRect(x + 2, y + 2, 2, 2);
+    ctx.fillRect(x + S - 4, y + 2, 2, 2);
+    ctx.fillRect(x + 2, y + S - 4, 2, 2);
+    ctx.fillRect(x + S - 4, y + S - 4, 2, 2);
   }
-  // Vertical mortar at staggered offset
-  const vx = (brickOffset + S / 2) % S;
-  ctx.fillRect(x + vx, y, 1, S);
 }
 
-function _drawFloor(ctx, x, y, S, row, col, offset) {
+function _drawFloor(ctx, x, y, S, row, col, offset, floorNum = 1) {
   const light = (row + col + offset) % 2 === 0;
-  ctx.fillStyle = light ? P.CREAM : P.CREAM_DK;
+
+  // Choose floor colors based on floor number
+  let lightColor, darkColor;
+  const floorMod = (floorNum - 1) % 4;
+  if (floorMod === 0) {
+    lightColor = P.FLOOR_1_LT;
+    darkColor = P.FLOOR_1_DK;
+  } else if (floorMod === 1) {
+    lightColor = P.FLOOR_2_LT;
+    darkColor = P.FLOOR_2_DK;
+  } else if (floorMod === 2) {
+    lightColor = P.FLOOR_3_LT;
+    darkColor = P.FLOOR_3_DK;
+  } else {
+    lightColor = P.FLOOR_4_LT;
+    darkColor = P.FLOOR_4_DK;
+  }
+
+  ctx.fillStyle = light ? lightColor : darkColor;
   ctx.fillRect(x, y, S, S);
   // Subtle grout lines
   ctx.fillStyle = 'rgba(0,0,0,0.08)';
@@ -178,19 +307,22 @@ function _drawDoor(ctx, x, y, S, d) {
     ctx.globalAlpha = 1;
   }
 
-  // Answer value badge — above door, but below HUD if too close to top
+  // Answer value badge — always inside the door cell, vertically centered
   const text = String(d.value);
-  ctx.font = 'bold 8px monospace';
+  ctx.font = 'bold 9px monospace';
   const tw = ctx.measureText(text).width;
   const bw = tw + 6;
-  const bh = 10;
+  const bh = 11;
   const bx = x + S / 2 - bw / 2;
-  const HUD_H = 16;
-  const by = (y - bh - 1 < HUD_H) ? y + S + 1 : y - bh - 1;
-  ctx.fillStyle = P.GOLD;
+  const by = y + (S - bh) / 2;
+  ctx.fillStyle = P.NAVY;
   _roundRect(ctx, bx, by, bw, bh, 2);
   ctx.fill();
-  ctx.fillStyle = P.NAVY;
+  ctx.strokeStyle = P.GOLD_LT;
+  ctx.lineWidth = 1;
+  _roundRect(ctx, bx, by, bw, bh, 2);
+  ctx.stroke();
+  ctx.fillStyle = P.GOLD_LT;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(text, x + S / 2, by + bh / 2);
@@ -211,10 +343,11 @@ function _roundRect(ctx, x, y, w, h, r) {
 }
 
 // ─── Bellhop ─────────────────────────────────────────────────────────────────
-export function drawBellhop(ctx, bx, by, dir = 'down', walkFrame = 0) {
+export function drawBellhop(ctx, bx, by, dir = 'down', walkFrame = 0, floorNum = 1) {
   const px = bx * CELL_SIZE;
   const py = by * CELL_SIZE;
-  const frames = BELLHOP_SPRITES[dir] || BELLHOP_SPRITES.down;
+  const catSprites = getCatSpritesForFloor(floorNum);
+  const frames = catSprites[dir] || catSprites.down;
   const frame = frames[walkFrame % frames.length];
   // Center 8-wide sprite in CELL_SIZE cell
   const ox = Math.floor((CELL_SIZE - 8) / 2);
@@ -319,6 +452,24 @@ export function spawnLightRays(particles, col, row) {
   }
 }
 
+export function spawnMoneyRemoval(particles, col, row, amount) {
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI * 2 * i) / 6 + (Math.random() - 0.5) * 0.4;
+    const speed = 30 + Math.random() * 30;
+    particles.push({
+      type: 'removal',
+      x: col * CELL_SIZE + CELL_SIZE / 2,
+      y: row * CELL_SIZE + CELL_SIZE / 2,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 30,
+      gravity: 0.2,
+      life: 600,
+      maxLife: 600,
+      amount,
+    });
+  }
+}
+
 export function drawParticles(ctx, particles) {
   particles.forEach(p => {
     const alpha = Math.min(1, p.life / p.maxLife * 2);
@@ -331,6 +482,10 @@ export function drawParticles(ctx, particles) {
       ctx.moveTo(p.x, p.y);
       ctx.lineTo(p.x + p.vx * p.len, p.y + p.vy * p.len);
       ctx.stroke();
+    } else if (p.type === 'removal') {
+      // Money removal particle (red/orange)
+      ctx.fillStyle = P.RED;
+      ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
     } else {
       // Coin spin: 4 frames
       ctx.fillStyle = p.frame === 0 || p.frame === 2 ? P.GOLD : P.GOLD_LT;

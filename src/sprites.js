@@ -16,11 +16,35 @@ export const PALETTE = {
   NAVY:        '#16213E',
   WHITE:       '#FFFFFF',
   RED:         '#C0392B',
-  // Extra tones used in bellhop
-  SKIN:        '#F4A261',
-  SKIN_DK:     '#D4845A',
-  GOLD_BTN:    '#FFD700',
-  DARK:        '#0A0A0A',
+  // Floor colors - one per floor
+  FLOOR_1_LT:  '#E8D4B8',
+  FLOOR_1_DK:  '#D4B896',
+  FLOOR_2_LT:  '#C8E6D6',
+  FLOOR_2_DK:  '#A8D4BC',
+  FLOOR_3_LT:  '#D4E8F5',
+  FLOOR_3_DK:  '#A8D4E8',
+  FLOOR_4_LT:  '#E8D4F5',
+  FLOOR_4_DK:  '#D8B8E8',
+  // Cat colors - will be selected based on floor
+  // Orange cat
+  CAT_ORANGE:  '#FF9D4D',
+  CAT_ORANGE_DK: '#E67E35',
+  // White cat
+  CAT_WHITE:   '#F5F5F5',
+  CAT_GRAY:    '#D3D3D3',
+  // Gray cat
+  CAT_GRAY_MD: '#A9A9A9',
+  CAT_GRAY_DK: '#696969',
+  // Black cat
+  CAT_BLACK:   '#1A1A1A',
+  CAT_BLACK_DK: '#0A0A0A',
+  // Common
+  EYE_WHITE:   '#FFFFFF',
+  EYE_BLACK:   '#000000',
+  EYE_PUPIL:   '#4A4A4A',
+  NOSE_PINK:   '#FF99BB',
+  MOUTH_PINK:  '#FFB3D9',
+  BLUSH:       '#FFB8C8',
 };
 
 // ─── Sprite renderer ──────────────────────────────────────────────────────────
@@ -36,262 +60,280 @@ export function drawSprite(ctx, grid, x, y, scale = 1) {
   }
 }
 
-// ─── Bellhop sprites ─────────────────────────────────────────────────────────
+// ─── Cute Cat sprites ────────────────────────────────────────────────────────
 // 8 wide × 16 tall, palette key per pixel (null = transparent)
 // Directions: down (facing camera), up, left, right
 // 4 walk frames each
+// Multiple color variants for different floors
 
 const _ = null;
 
-// Shared hat rows (same for all directions)
-const HAT_TOP    = [_,'NAVY','NAVY','NAVY','NAVY','NAVY','NAVY',_];
-const HAT_BRIM   = ['NAVY','NAVY','NAVY','NAVY','NAVY','NAVY','NAVY','NAVY'];
-const HAT_BAND   = [_,'GOLD','GOLD','GOLD','GOLD','GOLD','GOLD',_];
+// Helper to create cat sprites with custom colors
+function createCatSprites(bodyColor, bodyDark, accentColor) {
+  // Down-facing frames (4 frames: neutral, step-right, neutral, step-left)
+  const CAT_DOWN = [
+    // Frame 0 - neutral, adorable face
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,bodyColor,_,_],           // ears
+      [_,bodyColor,accentColor,accentColor,accentColor,accentColor,bodyColor,_],  // inner ears
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_], // head
+      [_,bodyColor,'EYE_WHITE','EYE_BLACK',bodyColor,'EYE_WHITE','EYE_BLACK',_], // eyes
+      [_,bodyColor,'BLUSH',bodyColor,'NOSE_PINK',bodyColor,'BLUSH',_],  // blush & nose
+      [_,bodyColor,bodyColor,'MOUTH_PINK','MOUTH_PINK',bodyColor,bodyColor,_],  // smile
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],  // body
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],                     // legs
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_], // paws
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+    // Frame 1 - step right, slight head tilt
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyColor,accentColor,accentColor,accentColor,accentColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,'EYE_WHITE','EYE_BLACK',bodyColor,'EYE_WHITE','EYE_BLACK',_],
+      [_,bodyColor,'BLUSH',bodyColor,'NOSE_PINK',bodyColor,'BLUSH',_],
+      [_,bodyColor,bodyColor,'MOUTH_PINK','MOUTH_PINK',bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,_,bodyDark,bodyDark,_,_,_,_],
+      [_,_,_,_,bodyDark,bodyDark,bodyDark,_],
+      [_,_,_,bodyDark,bodyDark,_,bodyDark,_],
+      [_,_,_,bodyDark,_,_,bodyDark,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+    // Frame 2 - neutral (same as 0)
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyColor,accentColor,accentColor,accentColor,accentColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,'EYE_WHITE','EYE_BLACK',bodyColor,'EYE_WHITE','EYE_BLACK',_],
+      [_,bodyColor,'BLUSH',bodyColor,'NOSE_PINK',bodyColor,'BLUSH',_],
+      [_,bodyColor,bodyColor,'MOUTH_PINK','MOUTH_PINK',bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+    // Frame 3 - step left, slight head tilt
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyColor,accentColor,accentColor,accentColor,accentColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,'EYE_WHITE','EYE_BLACK',bodyColor,'EYE_WHITE','EYE_BLACK',_],
+      [_,bodyColor,'BLUSH',bodyColor,'NOSE_PINK',bodyColor,'BLUSH',_],
+      [_,bodyColor,bodyColor,'MOUTH_PINK','MOUTH_PINK',bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,bodyDark,bodyDark,_,_,bodyDark,bodyDark,_],
+      [_,_,_,bodyDark,bodyDark,_,_,_],
+      [_,bodyDark,_,bodyDark,bodyDark,_,bodyDark,_],
+      [_,bodyDark,_,bodyDark,_,_,bodyDark,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+  ];
 
-// Down-facing frames (4 frames: neutral, step-right, neutral, step-left)
-const BELLHOP_DOWN = [
-  // Frame 0 - neutral
-  [
-    HAT_TOP,
-    HAT_BRIM,
-    HAT_BAND,
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],      // head
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN','SKIN_DK',_],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'], // collar
-    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'], // body
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],  // legs
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],                // feet
-    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
-  ],
-  // Frame 1 - step right
-  [
-    HAT_TOP,
-    HAT_BRIM,
-    HAT_BAND,
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN','SKIN_DK',_],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,_,'CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK',_,_],
-    [_,_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_],
-    [_,_,_,'WALL_DARK','WALL_DARK',_,_,_],
-  ],
-  // Frame 2 - neutral (same as 0)
-  [
-    HAT_TOP,
-    HAT_BRIM,
-    HAT_BAND,
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN','SKIN_DK',_],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
-    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
-  ],
-  // Frame 3 - step left
-  [
-    HAT_TOP,
-    HAT_BRIM,
-    HAT_BAND,
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN','SKIN_DK',_],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,_,'CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK',_,_],
-    [_,_,_,'WALL_DARK','WALL_DARK',_,_,_],
-    [_,_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_],
-  ],
-];
+  // Up-facing (back of cat, ears visible)
+  const CAT_UP = [
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyColor,accentColor,accentColor,accentColor,accentColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,bodyDark,bodyDark,bodyDark,bodyDark,bodyDark,bodyDark,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyColor,accentColor,accentColor,accentColor,accentColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,bodyDark,bodyDark,bodyDark,bodyDark,bodyDark,bodyDark,_],
+      [_,_,bodyDark,bodyDark,_,_,_,_],
+      [_,_,_,bodyDark,bodyDark,_,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyColor,accentColor,accentColor,accentColor,accentColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,bodyDark,bodyDark,bodyDark,bodyDark,bodyDark,bodyDark,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyColor,accentColor,accentColor,accentColor,accentColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',bodyColor,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,bodyDark,_],
+      [_,bodyDark,bodyDark,bodyDark,bodyDark,bodyDark,bodyDark,_],
+      [_,bodyDark,bodyDark,_,_,bodyDark,bodyDark,_],
+      [_,_,_,bodyDark,bodyDark,_,_,_],
+      [_,bodyDark,bodyDark,bodyDark,bodyDark,bodyDark,bodyDark,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+  ];
 
-// Up-facing (back of bellhop)
-const BELLHOP_UP = [
-  [
-    HAT_TOP,
-    HAT_BRIM,
-    HAT_BAND,
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
-    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
-  ],
-  // frame 1 step
-  [
-    HAT_TOP,
-    HAT_BRIM,
-    HAT_BAND,
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,_,'CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK',_,_],
-    [_,_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_],
-    [_,_,_,'WALL_DARK','WALL_DARK',_,_,_],
-  ],
-  // frame 2 neutral
-  [
-    HAT_TOP,
-    HAT_BRIM,
-    HAT_BAND,
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
-    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
-  ],
-  // frame 3 step
-  [
-    HAT_TOP,
-    HAT_BRIM,
-    HAT_BAND,
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
-    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
-    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
-    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
-    [_,_,'CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK',_,_],
-    [_,_,_,'WALL_DARK','WALL_DARK',_,_,_],
-    [_,_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_],
-  ],
-];
+  // Left-facing (side profile)
+  const CAT_LEFT = [
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,accentColor,accentColor,bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,'EYE_WHITE','EYE_BLACK',bodyColor,_,_,_],
+      [_,bodyColor,'BLUSH','NOSE_PINK',bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,'MOUTH_PINK',bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',_,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE',bodyColor,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,accentColor,accentColor,bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,'EYE_WHITE','EYE_BLACK',bodyColor,_,_,_],
+      [_,bodyColor,'BLUSH','NOSE_PINK',bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,'MOUTH_PINK',bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',_,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE',bodyColor,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,_,_,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,_,_,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,accentColor,accentColor,bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,'EYE_WHITE','EYE_BLACK',bodyColor,_,_,_],
+      [_,bodyColor,'BLUSH','NOSE_PINK',bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,'MOUTH_PINK',bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',_,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE',bodyColor,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+    [
+      [_,_,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,accentColor,accentColor,bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,'EYE_WHITE','EYE_BLACK',bodyColor,_,_,_],
+      [_,bodyColor,'BLUSH','NOSE_PINK',bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,'MOUTH_PINK',bodyColor,_,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,_,_,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE','WHITE',_,_],
+      [_,bodyColor,'WHITE','WHITE','WHITE',bodyColor,_,_],
+      [_,bodyColor,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyDark,bodyColor,bodyColor,bodyColor,bodyColor,_,_],
+      [_,bodyDark,bodyDark,_,_,bodyDark,_,_],
+      [_,_,_,bodyDark,bodyDark,_,_,_],
+      [_,_,bodyDark,bodyDark,bodyDark,bodyDark,_,_],
+      [_,_,_,_,_,_,_,_],
+    ],
+  ];
 
-// Left-facing
-const BELLHOP_LEFT = [
-  [
-    [_,_,'NAVY','NAVY','NAVY','NAVY',_,_],
-    [_,'NAVY','NAVY','NAVY','NAVY','NAVY','NAVY',_],
-    [_,'GOLD','GOLD','GOLD','GOLD','GOLD','GOLD',_],
-    [_,_,'SKIN','SKIN','SKIN','SKIN',_,_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN',_,_],
-    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN_DK',_,_],
-    [_,'BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT',_,_],
-    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
-    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
-    [_,'WALL_DARK','WALL_DARK',_,'WALL_DARK',_,_,_],
-    [_,'WALL_DARK','WALL_DARK',_,'WALL_DARK',_,_,_],
-  ],
-  [
-    [_,_,'NAVY','NAVY','NAVY','NAVY',_,_],
-    [_,'NAVY','NAVY','NAVY','NAVY','NAVY','NAVY',_],
-    [_,'GOLD','GOLD','GOLD','GOLD','GOLD','GOLD',_],
-    [_,_,'SKIN','SKIN','SKIN','SKIN',_,_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN',_,_],
-    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN_DK',_,_],
-    [_,'BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT',_,_],
-    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
-    [_,_,_,'CREAM_DK','CREAM_DK',_,_,_],
-    [_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_,_],
-    [_,_,'WALL_DARK','WALL_DARK',_,_,_,_],
-  ],
-  [
-    [_,_,'NAVY','NAVY','NAVY','NAVY',_,_],
-    [_,'NAVY','NAVY','NAVY','NAVY','NAVY','NAVY',_],
-    [_,'GOLD','GOLD','GOLD','GOLD','GOLD','GOLD',_],
-    [_,_,'SKIN','SKIN','SKIN','SKIN',_,_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN',_,_],
-    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN_DK',_,_],
-    [_,'BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT',_,_],
-    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
-    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
-    [_,'WALL_DARK','WALL_DARK',_,'WALL_DARK',_,_,_],
-    [_,'WALL_DARK','WALL_DARK',_,'WALL_DARK',_,_,_],
-  ],
-  [
-    [_,_,'NAVY','NAVY','NAVY','NAVY',_,_],
-    [_,'NAVY','NAVY','NAVY','NAVY','NAVY','NAVY',_],
-    [_,'GOLD','GOLD','GOLD','GOLD','GOLD','GOLD',_],
-    [_,_,'SKIN','SKIN','SKIN','SKIN',_,_],
-    [_,'SKIN','SKIN','SKIN','SKIN','SKIN',_,_],
-    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN_DK',_,_],
-    [_,'BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
-    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT',_,_],
-    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
-    [_,_,_,'CREAM_DK','CREAM_DK',_,_,_],
-    [_,_,'WALL_DARK','WALL_DARK',_,_,_,_],
-    [_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_,_],
-  ],
-];
+  // Right-facing: mirror of left
+  function mirrorGrid(grid) {
+    return grid.map(frame => frame.map(row => [...row].reverse()));
+  }
+  const CAT_RIGHT = mirrorGrid(CAT_LEFT);
 
-// Right-facing: mirror of left
-function mirrorGrid(grid) {
-  return grid.map(frame => frame.map(row => [...row].reverse()));
+  return {
+    down: CAT_DOWN,
+    up: CAT_UP,
+    left: CAT_LEFT,
+    right: CAT_RIGHT,
+  };
 }
-const BELLHOP_RIGHT = mirrorGrid(BELLHOP_LEFT);
 
-export const BELLHOP_SPRITES = {
-  down:  BELLHOP_DOWN,
-  up:    BELLHOP_UP,
-  left:  BELLHOP_LEFT,
-  right: BELLHOP_RIGHT,
-};
+// Create cat sprite variants with different colors for each floor
+const CAT_COLORS = [
+  // Floor 1: Orange cat
+  createCatSprites('CAT_ORANGE', 'CAT_ORANGE_DK', 'CAT_CREAM'),
+  // Floor 2: White cat
+  createCatSprites('CAT_WHITE', 'CAT_GRAY', 'CAT_GRAY'),
+  // Floor 3: Gray cat
+  createCatSprites('CAT_GRAY_MD', 'CAT_GRAY_DK', 'CAT_GRAY'),
+  // Floor 4: Black cat
+  createCatSprites('CAT_BLACK', 'CAT_BLACK_DK', 'WHITE'),
+];
+
+// Get cat sprites for a specific floor (cycles through colors)
+export function getCatSpritesForFloor(floorNum) {
+  const colorIndex = (floorNum - 1) % CAT_COLORS.length;
+  return CAT_COLORS[colorIndex];
+}
+
+// Default export for compatibility
+export const BELLHOP_SPRITES = CAT_COLORS[0];
+

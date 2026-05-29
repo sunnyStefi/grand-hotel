@@ -5,7 +5,7 @@ import { initAudio, playSfx, speakSum, setMuted, isMuted } from './audio.js';
 import { saveState, loadState } from './storage.js';
 import {
   initRenderer, drawMaze, drawBellhop, drawSumBanner, drawHUD, drawPauseOverlay,
-  drawBuildScreen, updateParticles, spawnCoins, spawnLightRays, drawParticles,
+  drawBuildScreen, updateParticles, spawnCoins, spawnLightRays, spawnMoneyRemoval, drawParticles,
   drawVignetteOverlay, getBuildItems,
 } from './renderer.js';
 
@@ -242,9 +242,17 @@ function tryMove(dir) {
         state.bellhop.y = ny;
       } else {
         playSfx('buzz');
+        playSfx('sad');
         state.streak = 0;
         door.flash = 300;
         state.shake = { x: 4, y: 3, ttl: 12 };
+        // Remove money penalty
+        const penalty = 10;
+        state.money = Math.max(0, state.money - penalty);
+        state.moneyAnimStart = state.displayMoney;
+        state.moneyAnimTarget = state.money;
+        state.moneyAnimTimer = 0;
+        spawnMoneyRemoval(state.particles, nx, ny, penalty);
         // Don't move
       }
       return;
@@ -436,7 +444,7 @@ function render() {
 
   // Maze + game elements
   drawMaze(ctx, state.maze, state.doorOverlays, state.currentFloor);
-  drawBellhop(ctx, state.bellhop.x, state.bellhop.y, state.direction, state.walkFrame);
+  drawBellhop(ctx, state.bellhop.x, state.bellhop.y, state.direction, state.walkFrame, state.currentFloor);
   drawSumBanner(ctx, state.activeJunction, state.currentSum, state.maze);
   drawParticles(ctx, state.particles);
 

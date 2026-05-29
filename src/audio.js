@@ -34,6 +34,9 @@ function makeFanfare() {
 function makeCashout() {
   return _makeTone([392, 523, 659, 784, 1047], [0.1, 0.1, 0.1, 0.1, 0.3], 'sine');
 }
+function makeSad() {
+  return _makeTone([400, 300, 200, 100], [0.15, 0.15, 0.15, 0.2], 'sawtooth');
+}
 
 function _makeTone(freqs, durations, type) {
   const ac = getCtx();
@@ -64,6 +67,7 @@ export function initAudio() {
   buffers.combo   = makeCombo();
   buffers.fanfare = makeFanfare();
   buffers.cashout = makeCashout();
+  buffers.sad     = makeSad();
 
   // Music — generated chiptune loop
   startMusic(ac);
