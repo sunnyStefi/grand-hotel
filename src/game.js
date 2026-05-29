@@ -399,7 +399,7 @@ function render() {
   // Maze + game elements
   drawMaze(ctx, state.maze, state.doorOverlays);
   drawBellhop(ctx, state.bellhop.x, state.bellhop.y);
-  drawSumBanner(ctx, state.activeJunction, state.currentSum);
+  drawSumBanner(ctx, state.activeJunction, state.currentSum, state.maze);
   drawParticles(ctx, state.particles);
   drawHUD(ctx, state, LW, LH);
 

@@ -95,29 +95,34 @@ export function drawBellhop(ctx, bx, by, dir) {
   ctx.fillRect(px + 2, py + 3, 12, 2);
 }
 
-export function drawSumBanner(ctx, junction, sum) {
+export function drawSumBanner(ctx, junction, sum, maze) {
   if (!junction || !sum) return;
   const cx = junction.col * CELL_SIZE + CELL_SIZE / 2;
-  let cy = junction.row * CELL_SIZE - 4;
 
-  // Avoid HUD at top (0-14px) by drawing below if needed
-  const boxTop = cy - 10;
-  if (boxTop < 16) {
-    cy = junction.row * CELL_SIZE + CELL_SIZE + 4;
-  }
+  // Detect if junction is horizontal or vertical based on adjacent cells
+  const isHorizontal = maze &&
+    maze[junction.row]?.[junction.col - 1] !== WALL &&
+    maze[junction.row]?.[junction.col + 1] !== WALL;
+
+  // Place banner 3 cells below for horizontal, 4 cells below for vertical (more space from bellhop)
+  const offset = isHorizontal ? 3 : 4;
+  const cy = junction.row * CELL_SIZE + (offset * CELL_SIZE);
 
   const text = `${sum.a} + ${sum.b} = ?`;
-  ctx.font = 'bold 11px monospace';
-  const w = ctx.measureText(text).width + 12;
+  ctx.font = 'bold 13px monospace';
+  const pad = 6;
+  const tw = ctx.measureText(text).width;
+  const bw = tw + pad * 2;
+  const bh = 18;
   ctx.fillStyle = 'rgba(26,10,0,0.88)';
-  ctx.fillRect(cx - w / 2, cy - 10, w, 14);
+  ctx.fillRect(cx - bw / 2, cy - bh / 2, bw, bh);
   ctx.strokeStyle = C.gold;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(cx - w / 2, cy - 10, w, 14);
+  ctx.lineWidth = 2;
+  ctx.strokeRect(cx - bw / 2, cy - bh / 2, bw, bh);
   ctx.fillStyle = C.gold;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, cx, cy - 3);
+  ctx.fillText(text, cx, cy);
 }
 
 // Particles
