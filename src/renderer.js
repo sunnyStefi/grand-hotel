@@ -98,7 +98,14 @@ export function drawBellhop(ctx, bx, by, dir) {
 export function drawSumBanner(ctx, junction, sum) {
   if (!junction || !sum) return;
   const cx = junction.col * CELL_SIZE + CELL_SIZE / 2;
-  const cy = junction.row * CELL_SIZE - 4;
+  let cy = junction.row * CELL_SIZE - 4;
+
+  // Avoid HUD at top (0-14px) by drawing below if needed
+  const boxTop = cy - 10;
+  if (boxTop < 16) {
+    cy = junction.row * CELL_SIZE + CELL_SIZE + 4;
+  }
+
   const text = `${sum.a} + ${sum.b} = ?`;
   ctx.font = 'bold 11px monospace';
   const w = ctx.measureText(text).width + 12;
@@ -153,7 +160,7 @@ export function drawParticles(ctx, particles) {
   ctx.globalAlpha = 1;
 }
 
-export function drawHUD(ctx, state, W, H) {
+export function drawHUD(ctx, state, W, H, showFloor = true) {
   // Background strip
   ctx.fillStyle = C.hud;
   ctx.fillRect(0, 0, W, 14);
@@ -165,10 +172,12 @@ export function drawHUD(ctx, state, W, H) {
   ctx.textBaseline = 'middle';
   ctx.fillText(`$${Math.floor(state.displayMoney)}`, 4, 7);
 
-  // Floor number
-  ctx.textAlign = 'center';
-  ctx.fillStyle = C.text;
-  ctx.fillText(`FLOOR ${state.currentFloor}`, W / 2, 7);
+  // Floor number (suppressed on build screen where it overlaps the title)
+  if (showFloor) {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = C.text;
+    ctx.fillText(`FLOOR ${state.currentFloor}`, W / 2, 7);
+  }
 
   // Combo
   if (state.streak >= 2) {

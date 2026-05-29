@@ -85,6 +85,9 @@ const saved = loadState();
 if (saved) {
   state.money = saved.money || 0;
   state.displayMoney = state.money;
+  state.moneyAnimTimer = 400;   // skip animation so loaded balance shows immediately
+  state.moneyAnimStart = state.money;
+  state.moneyAnimTarget = state.money;
   state.currentFloor = saved.highestFloor || 1;
   state.hotel = saved.hotel || state.hotel;
   if (saved.difficulty) {
@@ -389,7 +392,7 @@ function render() {
 
   if (state.ui === 'build') {
     drawBuildScreen(ctx, state, state.buildSelectedIdx, LW, LH);
-    drawHUD(ctx, state, LW, LH);
+    drawHUD(ctx, state, LW, LH, false); // suppress floor number — build screen has own title
     return;
   }
 

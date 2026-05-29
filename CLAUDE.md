@@ -177,3 +177,40 @@ npx http-server                     # If Node is available
 
 - **docs/grand-hotel-math-maze.md** — full design doc; refer here for feature details, UX decisions, and why each choice exists.
 - **CLAUDE.md** (this file) — technical guidance and scope priorities.
+- **openspec/changes/implement-grand-hotel-math-maze/tasks.md** — implementation checklist; keep this updated as tasks complete.
+
+---
+
+## Implementation Status
+
+**Dev server:** `python3 -m http.server 8000` (PID may vary — restart if needed)
+
+**Progress: 44/46 tasks complete** (groups 1–9 fully done, group 10 needs final manual play-test)
+
+### What's built and verified working
+- Full game loop: maze → door junction → math answer → coins → combo → floor clear → build screen → next floor
+- 3 hand-crafted floor templates (20×11 grid), cycling by floor number
+- Adaptive math: TIER_10/15/20, evaluated every 5 answers
+- Coin awards: base 15 + speed bonus 15 (if <3s) × combo multiplier (×1/1.5/2/2.5)
+- Coin particle burst + rolling money counter animation
+- Hotel build screen: Room 1/2/3 ($200/$300/$350), Floor 2 ($1000), star rating (1–3★)
+- Audio: synthesized SFX via Web Audio API (no mp3 files), procedural chiptune music, Web Speech API for spoken sums, mute toggle
+- localStorage persistence under `grand-hotel-save`
+- HUD: money counter, floor number, combo label, mute button
+
+### Source files
+```
+index.html          # Canvas entry point
+src/game.js         # Game loop, state, movement, junction/award/floor-clear logic
+src/renderer.js     # All Canvas drawing (maze, bellhop, particles, HUD, build screen)
+src/input.js        # Arrow keys, space (pause), nav helpers for build screen
+src/maze.js         # Cell constants, 3 floor templates, createFloor()
+src/math-engine.js  # generateSum(), generateDecoys(), updateTier()
+src/audio.js        # Web Audio SFX synthesis, chiptune loop, speakSum(), setMuted()
+src/storage.js      # saveState() / loadState() → localStorage['grand-hotel-save']
+```
+
+### Remaining work (before handing to player)
+1. Fix build screen title overlapping HUD "FLOOR N" text
+2. Full manual play-test checklist (tasks 10.5 + 10.6)
+3. Verify page reload restores saved state correctly
