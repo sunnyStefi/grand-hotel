@@ -13,6 +13,12 @@ export function saveState(state) {
   } catch (_) {}
 }
 
+export function clearState() {
+  try {
+    localStorage.removeItem(KEY);
+  } catch (_) {}
+}
+
 export function loadState() {
   try {
     const raw = localStorage.getItem(KEY);

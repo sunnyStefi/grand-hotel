@@ -3,9 +3,9 @@ export const TIER_2 = 'TIER_2';
 export const TIER_3 = 'TIER_3';
 
 const TIER_CONFIGS = {
-  [TIER_1]: { min: 2, max: 8,  allowSub: false },
-  [TIER_2]: { min: 4, max: 12, allowSub: true  },
-  [TIER_3]: { min: 8, max: 16, allowSub: true  },
+  [TIER_1]: { min: 2, max: 8  },
+  [TIER_2]: { min: 4, max: 12 },
+  [TIER_3]: { min: 8, max: 16 },
 };
 const TIER_ORDER = [TIER_1, TIER_2, TIER_3];
 
@@ -13,12 +13,20 @@ function randInt(lo, hi) {
   return Math.floor(lo + Math.random() * (hi - lo + 1));
 }
 
-export function generateProblem(tier) {
+// Chance a problem is subtraction, driven by floor (not tier):
+// floor 1 = pure addition (simple sums), then subtraction is introduced at
+// floor 2 and ramps up gradually as the player climbs.
+function subProbability(floorNum) {
+  if (floorNum < 2) return 0;
+  return Math.min(0.5, 0.15 + (floorNum - 2) * 0.12);
+}
+
+export function generateProblem(tier, floorNum = 1) {
   const cfg = TIER_CONFIGS[tier];
-  if (cfg.allowSub && Math.random() < 0.4) {
-    // Subtraction
+  if (Math.random() < subProbability(floorNum)) {
+    // Subtraction — keep it simple: small subtrahend, never negative.
     const a = randInt(cfg.min, cfg.max);
-    const b = randInt(1, Math.max(a - 1, 1));
+    const b = randInt(1, Math.min(a - 1, 5));
     return { a, b, operator: '−', answer: a - b };
   } else {
     // Addition

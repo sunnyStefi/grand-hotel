@@ -42,6 +42,16 @@ export function consumeEnterPress() {
   return fired;
 }
 
+// Enter only (no Space) — used by the pause menu so Space stays a pure
+// pause/resume toggle without also firing menu selection on the same frame.
+let enterOnlyPrev = false;
+export function consumeEnterOnly() {
+  const now = !!keys['Enter'];
+  const fired = now && !enterOnlyPrev;
+  enterOnlyPrev = now;
+  return fired;
+}
+
 let upPrev = false, downPrev = false;
 export function consumeNavUp() {
   const now = !!keys['ArrowUp'];

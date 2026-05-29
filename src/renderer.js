@@ -401,7 +401,6 @@ export function drawBellhop(ctx, bx, by, dir = 'down', walkFrame = 0, floorNum =
 // ─── Sum banner ───────────────────────────────────────────────────────────────
 export function drawSumBanner(ctx, junction, sum, maze, floorNum = 1) {
   if (!junction || !sum) return;
-  const cx = junction.col * CELL_SIZE + CELL_SIZE / 2;
 
   const isHorizontal = maze &&
     maze[junction.row]?.[junction.col - 1] !== WALL &&
@@ -418,6 +417,13 @@ export function drawSumBanner(ctx, junction, sum, maze, floorNum = 1) {
   const tw = ctx.measureText(text).width;
   const bw = tw + pad * 2;
   const bh = 20;
+
+  // Keep the badge fully on-screen — junctions can sit at the maze edges
+  // (e.g. floor 3 has a door at col 1), which would push the box off-canvas.
+  const screenW = maze ? maze[0].length * CELL_SIZE : 320;
+  const margin = 2;
+  let cx = junction.col * CELL_SIZE + CELL_SIZE / 2;
+  cx = Math.max(bw / 2 + margin, Math.min(screenW - bw / 2 - margin, cx));
 
   // Shadow
   ctx.fillStyle = 'rgba(0,0,0,0.6)';
@@ -647,17 +653,33 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
   }
 }
 
-export function drawPauseOverlay(ctx, W, H) {
-  ctx.fillStyle = 'rgba(0,0,0,0.65)';
+// Pause menu layout (shared with game.js click hit-testing)
+export const PAUSE_MENU_Y0 = 56;
+export const PAUSE_MENU_STEP = 16;
+
+export function drawPauseOverlay(ctx, W, H, items = [], selectedIdx = 0, savedFlash = 0) {
+  ctx.fillStyle = 'rgba(0,0,0,0.72)';
   ctx.fillRect(0, 0, W, H);
+
   ctx.fillStyle = P.GOLD_LT;
   ctx.font = 'bold 14px monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('PAUSED', W / 2, H / 2 - 8);
-  ctx.fillStyle = P.CREAM;
-  ctx.font = '8px monospace';
-  ctx.fillText('press SPACE to resume', W / 2, H / 2 + 8);
+  ctx.fillText('PAUSED', W / 2, 28);
+
+  items.forEach((label, i) => {
+    const iy = PAUSE_MENU_Y0 + i * PAUSE_MENU_STEP;
+    const selected = i === selectedIdx;
+    ctx.fillStyle = selected ? P.GOLD : P.CREAM;
+    ctx.font = selected ? 'bold 9px monospace' : '9px monospace';
+    let text = (selected ? '▶ ' : '  ') + label;
+    if (label === 'Save game' && savedFlash > 0) text += '   ✓ Saved';
+    ctx.fillText(text, W / 2, iy);
+  });
+
+  ctx.fillStyle = P.WALL_LT;
+  ctx.font = '7px monospace';
+  ctx.fillText('↑↓ select   ENTER pick   SPACE resume', W / 2, H - 8);
 }
 
 export function drawBuildScreen(ctx, state, selectedIdx, W, H) {

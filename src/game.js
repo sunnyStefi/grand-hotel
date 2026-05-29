@@ -1,13 +1,16 @@
 import { createFloor, WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, DOWN_LIFT, CELL_SIZE, COLS, ROWS } from './maze.js';
 import { generateProblem, generateDecoys, updateTier, TIER_1, TIER_2, TIER_3 } from './math-engine.js';
-import { getInput, getInputJustPressed, consumeSpacePress, consumeEnterPress, consumeNavUp, consumeNavDown } from './input.js';
+import { getInput, getInputJustPressed, consumeSpacePress, consumeEnterPress, consumeEnterOnly, consumeNavUp, consumeNavDown } from './input.js';
 import { initAudio, playSfx, setMuted, isMuted } from './audio.js';
-import { saveState, loadState } from './storage.js';
+import { saveState, loadState, clearState } from './storage.js';
 import {
   initRenderer, drawMaze, drawBellhop, drawSumBanner, drawHUD, drawPauseOverlay,
   drawBuildScreen, updateParticles, spawnCoins, spawnLightRays, spawnMoneyRemoval, drawParticles,
-  drawVignetteOverlay, getBuildItems,
+  drawVignetteOverlay, getBuildItems, PAUSE_MENU_Y0, PAUSE_MENU_STEP,
 } from './renderer.js';
+
+// Pause menu items (order shown top-to-bottom)
+const PAUSE_ITEMS = ['Resume', 'Save game', 'Reload last save', 'New game'];
 
 // ─── Canvas setup ────────────────────────────────────────────────────────────
 const canvas = document.getElementById('game');
@@ -87,6 +90,8 @@ function defaultState() {
 
     // UI
     paused: false,
+    pauseSelectedIdx: 0,
+    savedFlashTimer: 0,
     clearAnimTimer: 0,
 
     // Title splash
@@ -184,6 +189,19 @@ canvas.addEventListener('click', e => {
   const scaleY = LH / rect.height;
   const lx = (e.clientX - rect.left) * scaleX;
   const ly = (e.clientY - rect.top)  * scaleY;
+
+  // Pause menu item click (takes priority while paused)
+  if (state.ui === 'pause') {
+    for (let i = 0; i < PAUSE_ITEMS.length; i++) {
+      const iy = PAUSE_MENU_Y0 + i * PAUSE_MENU_STEP;
+      if (ly >= iy - PAUSE_MENU_STEP / 2 && ly < iy + PAUSE_MENU_STEP / 2) {
+        state.pauseSelectedIdx = i;
+        activatePauseSelection();
+      }
+    }
+    return;
+  }
+
   if (lx >= MUTE_X && lx <= MUTE_X + MUTE_W && ly >= MUTE_Y && ly <= MUTE_Y + MUTE_H) {
     setMuted(!isMuted());
   } else if (lx >= INFL_X && lx <= INFL_X + INFL_W && ly >= INFL_Y && ly <= INFL_Y + INFL_H) {
@@ -222,7 +240,7 @@ function activateJunction(row, col) {
   if (state.activeJunction) return;
   state.activeJunction = { row, col };
   state.junctionStartTime = performance.now();
-  state.currentSum = generateProblem(state.tier);
+  state.currentSum = generateProblem(state.tier, state.currentFloor);
 
 
   // Place answer doors on adjacent FLOOR cells
@@ -372,6 +390,27 @@ function showBuildScreen() {
   state.buildSelectedIdx = 0;
 }
 
+function activatePauseSelection() {
+  const choice = PAUSE_ITEMS[state.pauseSelectedIdx];
+  if (choice === 'Resume') {
+    state.paused = false;
+    state.ui = 'game';
+  } else if (choice === 'Save game') {
+    saveState(state);
+    state.savedFlashTimer = 1500;
+    playSfx('ding');
+  } else if (choice === 'Reload last save') {
+    if (window.confirm('Reload your last saved game? Anything since your last save will be lost.')) {
+      window.location.reload();
+    }
+  } else if (choice === 'New game') {
+    if (window.confirm('Start a new game? This erases your hotel, coins and progress.')) {
+      clearState();
+      window.location.reload();
+    }
+  }
+}
+
 function activateBuildSelection() {
   const items = getBuildItems(state);
   const idx = state.buildSelectedIdx;
@@ -419,15 +458,28 @@ function update(dt) {
     return;  // freeze gameplay during splash
   }
 
-  // Pause toggle
+  // Pause toggle (Space). Opening returns early so the menu doesn't also
+  // process a selection on the same frame.
   if (consumeSpacePress()) {
-    if (state.ui === 'game' || state.ui === 'pause') {
-      state.paused = !state.paused;
-      state.ui = state.paused ? 'pause' : 'game';
+    if (state.ui === 'game') {
+      state.paused = true;
+      state.ui = 'pause';
+      state.pauseSelectedIdx = 0;
+      return;
+    } else if (state.ui === 'pause') {
+      state.paused = false;
+      state.ui = 'game';
     }
   }
 
-  if (state.ui === 'pause') return;
+  // Pause menu navigation
+  if (state.ui === 'pause') {
+    if (state.savedFlashTimer > 0) state.savedFlashTimer -= dt;
+    if (consumeNavUp())   state.pauseSelectedIdx = (state.pauseSelectedIdx + PAUSE_ITEMS.length - 1) % PAUSE_ITEMS.length;
+    if (consumeNavDown()) state.pauseSelectedIdx = (state.pauseSelectedIdx + 1) % PAUSE_ITEMS.length;
+    if (consumeEnterOnly()) activatePauseSelection();
+    return;
+  }
 
   if (state.ui === 'clear') {
     state.clearAnimTimer -= dt;
@@ -577,7 +629,7 @@ function render() {
     ctx.fillText(`Bank: $${Math.floor(state.money)}`, LW / 2, LH / 2 + 6);
   }
 
-  if (state.ui === 'pause') drawPauseOverlay(ctx, LW, LH);
+  if (state.ui === 'pause') drawPauseOverlay(ctx, LW, LH, PAUSE_ITEMS, state.pauseSelectedIdx, state.savedFlashTimer);
 
   // Title splash
   if (state.titleSplashTimer > 0) {
