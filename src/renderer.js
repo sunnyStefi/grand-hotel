@@ -1,6 +1,6 @@
 import { WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, DOWN_LIFT, CELL_SIZE } from './maze.js';
 import { isMuted } from './audio.js';
-import { PALETTE, drawSprite, BELLHOP_SPRITES, getCatSpritesForFloor } from './sprites.js';
+import { PALETTE, drawSprite, BELLHOP_SPRITES, getBellhopSprites } from './sprites.js';
 
 const P = PALETTE;
 
@@ -356,8 +356,8 @@ function _roundRect(ctx, x, y, w, h, r) {
 export function drawBellhop(ctx, bx, by, dir = 'down', walkFrame = 0, floorNum = 1) {
   const px = bx * CELL_SIZE;
   const py = by * CELL_SIZE;
-  const catSprites = getCatSpritesForFloor(floorNum);
-  const frames = catSprites[dir] || catSprites.down;
+  const sprites = getBellhopSprites(floorNum);
+  const frames = sprites[dir] || sprites.down;
   const frame = frames[walkFrame % frames.length];
   drawSprite(ctx, frame, px, py, 1);
 }
