@@ -4,8 +4,9 @@ import { getInput, getInputJustPressed, consumeSpacePress, consumeEnterPress, co
 import { initAudio, playSfx, speakSum, setMuted, isMuted } from './audio.js';
 import { saveState, loadState } from './storage.js';
 import {
-  drawMaze, drawBellhop, drawSumBanner, drawHUD, drawPauseOverlay,
-  drawBuildScreen, updateParticles, spawnCoins, drawParticles, getBuildItems,
+  initRenderer, drawMaze, drawBellhop, drawSumBanner, drawHUD, drawPauseOverlay,
+  drawBuildScreen, updateParticles, spawnCoins, spawnLightRays, drawParticles,
+  drawVignetteOverlay, getBuildItems,
 } from './renderer.js';
 
 // ─── Canvas setup ────────────────────────────────────────────────────────────
@@ -17,6 +18,7 @@ canvas.width = LW;
 canvas.height = LH;
 canvas.style.imageRendering = 'pixelated';
 ctx.imageSmoothingEnabled = false;
+initRenderer(ctx);
 
 function resizeCanvas() {
   const scaleX = window.innerWidth / LW;
@@ -35,6 +37,9 @@ function defaultState() {
     currentFloor: 1,
     maze: null,
     bellhop: { x: 1, y: 1 },
+    direction: 'down',
+    walkFrame: 0,
+    walkTick: 0,
     moveTimer: 0,
     MOVE_INTERVAL: 100,  // ms per cell (held repeat)
 
@@ -71,6 +76,9 @@ function defaultState() {
 
     // Build screen
     buildSelectedIdx: 0,
+
+    // Screen shake
+    shake: { x: 0, y: 0, ttl: 0 },
 
     // UI
     paused: false,
@@ -196,6 +204,7 @@ function activateJunction(row, col) {
 const DIR_DELTA = { up: [0,-1], down: [0,1], left: [-1,0], right: [1,0] };
 
 function tryMove(dir) {
+  state.direction = dir;
   const [dx, dy] = DIR_DELTA[dir];
   const nx = state.bellhop.x + dx;
   const ny = state.bellhop.y + dy;
@@ -218,6 +227,7 @@ function tryMove(dir) {
         if (state.streak > state.stats.bestCombo) state.stats.bestCombo = state.streak;
         if (state.streak >= 2) playSfx('combo');
         awardCoins(elapsed, nx, ny);
+        spawnLightRays(state.particles, nx, ny);
         // Resolve junction
         state.maze[state.activeJunction.row][state.activeJunction.col] = FLOOR;
         state.doorOverlays = null;
@@ -233,7 +243,8 @@ function tryMove(dir) {
       } else {
         playSfx('buzz');
         state.streak = 0;
-        door.flash = 300; // ms
+        door.flash = 300;
+        state.shake = { x: 4, y: 3, ttl: 12 };
         // Don't move
       }
       return;
@@ -376,15 +387,35 @@ function update(dt) {
   // Particles
   updateParticles(state.particles, dt);
 
+  // Screen shake decay
+  if (state.shake.ttl > 0) {
+    state.shake.x *= -0.7;
+    state.shake.y *= -0.7;
+    state.shake.ttl--;
+    if (state.shake.ttl <= 0) { state.shake.x = 0; state.shake.y = 0; }
+  }
+
   // Movement — instant on first press, then repeat at MOVE_INTERVAL
   const justPressed = getInputJustPressed();
-  if (justPressed) state.moveTimer = state.MOVE_INTERVAL; // trigger immediate step
+  if (justPressed) state.moveTimer = state.MOVE_INTERVAL;
   state.moveTimer += dt;
+  const dir = getInput();
   if (state.moveTimer >= state.MOVE_INTERVAL) {
     state.moveTimer -= state.MOVE_INTERVAL;
-    const dir = getInput();
     if (dir && !state.activeJunction) tryMove(dir);
     else if (dir && state.doorOverlays) tryMove(dir);
+  }
+
+  // Walk animation
+  if (dir) {
+    state.walkTick += dt;
+    if (state.walkTick >= 120) {
+      state.walkTick = 0;
+      state.walkFrame = (state.walkFrame + 1) % 4;
+    }
+  } else {
+    state.walkFrame = 0;
+    state.walkTick = 0;
   }
 }
 
@@ -394,15 +425,23 @@ function render() {
 
   if (state.ui === 'build') {
     drawBuildScreen(ctx, state, state.buildSelectedIdx, LW, LH);
-    drawHUD(ctx, state, LW, LH, false); // suppress floor number — build screen has own title
+    drawHUD(ctx, state, LW, LH, false);
+    drawVignetteOverlay(ctx, LW, LH);
     return;
   }
 
+  // Apply screen shake
+  ctx.save();
+  ctx.translate(state.shake.x, state.shake.y);
+
   // Maze + game elements
-  drawMaze(ctx, state.maze, state.doorOverlays);
-  drawBellhop(ctx, state.bellhop.x, state.bellhop.y);
+  drawMaze(ctx, state.maze, state.doorOverlays, state.currentFloor);
+  drawBellhop(ctx, state.bellhop.x, state.bellhop.y, state.direction, state.walkFrame);
   drawSumBanner(ctx, state.activeJunction, state.currentSum, state.maze);
   drawParticles(ctx, state.particles);
+
+  ctx.restore();
+
   drawHUD(ctx, state, LW, LH);
 
   // Lift blocked message
@@ -431,6 +470,8 @@ function render() {
   }
 
   if (state.ui === 'pause') drawPauseOverlay(ctx, LW, LH);
+
+  drawVignetteOverlay(ctx, LW, LH);
 }
 
 // ─── Loop ─────────────────────────────────────────────────────────────────────

@@ -17,10 +17,24 @@
     #game {
       image-rendering: pixelated;
       image-rendering: crisp-edges;
+      position: relative;
+      z-index: 0;
+    }
+    #scanlines {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        transparent 0px, transparent 1px,
+        rgba(0,0,0,0.45) 1px, rgba(0,0,0,0.45) 2px
+      );
+      pointer-events: none;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
+  <div id="scanlines"></div>
   <canvas id="game"></canvas>
   <script type="module" src="src/game.js"></script>
 </body>

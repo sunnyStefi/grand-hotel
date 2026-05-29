@@ -1,0 +1,297 @@
+// ─── Palette ─────────────────────────────────────────────────────────────────
+export const PALETTE = {
+  BURGUNDY:    '#6B2737',
+  BURGUNDY_LT: '#8B3A4A',
+  GOLD:        '#D4A017',
+  GOLD_LT:     '#F0C040',
+  CREAM:       '#F5E6C8',
+  CREAM_DK:    '#C8B99A',
+  WALL_DARK:   '#1A1A2E',
+  WALL_MID:    '#2D2D44',
+  WALL_LT:     '#3D3D5C',
+  WOOD_DARK:   '#3B1F0D',
+  WOOD_MID:    '#6B3A1F',
+  WOOD_LT:     '#8B5A2B',
+  GREEN:       '#2D6A4F',
+  NAVY:        '#16213E',
+  WHITE:       '#FFFFFF',
+  RED:         '#C0392B',
+  // Extra tones used in bellhop
+  SKIN:        '#F4A261',
+  SKIN_DK:     '#D4845A',
+  GOLD_BTN:    '#FFD700',
+  DARK:        '#0A0A0A',
+};
+
+// ─── Sprite renderer ──────────────────────────────────────────────────────────
+// grid: 2D array of PALETTE keys (null = transparent)
+export function drawSprite(ctx, grid, x, y, scale = 1) {
+  for (let row = 0; row < grid.length; row++) {
+    for (let col = 0; col < grid[row].length; col++) {
+      const key = grid[row][col];
+      if (!key) continue;
+      ctx.fillStyle = PALETTE[key];
+      ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
+    }
+  }
+}
+
+// ─── Bellhop sprites ─────────────────────────────────────────────────────────
+// 8 wide × 16 tall, palette key per pixel (null = transparent)
+// Directions: down (facing camera), up, left, right
+// 4 walk frames each
+
+const _ = null;
+
+// Shared hat rows (same for all directions)
+const HAT_TOP    = [_,'NAVY','NAVY','NAVY','NAVY','NAVY','NAVY',_];
+const HAT_BRIM   = ['NAVY','NAVY','NAVY','NAVY','NAVY','NAVY','NAVY','NAVY'];
+const HAT_BAND   = [_,'GOLD','GOLD','GOLD','GOLD','GOLD','GOLD',_];
+
+// Down-facing frames (4 frames: neutral, step-right, neutral, step-left)
+const BELLHOP_DOWN = [
+  // Frame 0 - neutral
+  [
+    HAT_TOP,
+    HAT_BRIM,
+    HAT_BAND,
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],      // head
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN','SKIN_DK',_],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'], // collar
+    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'], // body
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],  // legs
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],                // feet
+    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
+  ],
+  // Frame 1 - step right
+  [
+    HAT_TOP,
+    HAT_BRIM,
+    HAT_BAND,
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN','SKIN_DK',_],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,_,'CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK',_,_],
+    [_,_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_],
+    [_,_,_,'WALL_DARK','WALL_DARK',_,_,_],
+  ],
+  // Frame 2 - neutral (same as 0)
+  [
+    HAT_TOP,
+    HAT_BRIM,
+    HAT_BAND,
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN','SKIN_DK',_],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
+    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
+  ],
+  // Frame 3 - step left
+  [
+    HAT_TOP,
+    HAT_BRIM,
+    HAT_BAND,
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN','SKIN_DK',_],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,_,'CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK',_,_],
+    [_,_,_,'WALL_DARK','WALL_DARK',_,_,_],
+    [_,_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_],
+  ],
+];
+
+// Up-facing (back of bellhop)
+const BELLHOP_UP = [
+  [
+    HAT_TOP,
+    HAT_BRIM,
+    HAT_BAND,
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
+    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
+  ],
+  // frame 1 step
+  [
+    HAT_TOP,
+    HAT_BRIM,
+    HAT_BAND,
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,_,'CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK',_,_],
+    [_,_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_],
+    [_,_,_,'WALL_DARK','WALL_DARK',_,_,_],
+  ],
+  // frame 2 neutral
+  [
+    HAT_TOP,
+    HAT_BRIM,
+    HAT_BAND,
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
+    [_,'WALL_DARK','WALL_DARK',_,_,'WALL_DARK','WALL_DARK',_],
+  ],
+  // frame 3 step
+  [
+    HAT_TOP,
+    HAT_BRIM,
+    HAT_BAND,
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN','SKIN',_],
+    ['BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY','GOLD_BTN','BURGUNDY','BURGUNDY_LT'],
+    ['BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT'],
+    [_,'CREAM_DK','CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK','CREAM_DK',_],
+    [_,_,'CREAM_DK','BURGUNDY','BURGUNDY','CREAM_DK',_,_],
+    [_,_,_,'WALL_DARK','WALL_DARK',_,_,_],
+    [_,_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_],
+  ],
+];
+
+// Left-facing
+const BELLHOP_LEFT = [
+  [
+    [_,_,'NAVY','NAVY','NAVY','NAVY',_,_],
+    [_,'NAVY','NAVY','NAVY','NAVY','NAVY','NAVY',_],
+    [_,'GOLD','GOLD','GOLD','GOLD','GOLD','GOLD',_],
+    [_,_,'SKIN','SKIN','SKIN','SKIN',_,_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN',_,_],
+    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN_DK',_,_],
+    [_,'BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT',_,_],
+    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
+    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
+    [_,'WALL_DARK','WALL_DARK',_,'WALL_DARK',_,_,_],
+    [_,'WALL_DARK','WALL_DARK',_,'WALL_DARK',_,_,_],
+  ],
+  [
+    [_,_,'NAVY','NAVY','NAVY','NAVY',_,_],
+    [_,'NAVY','NAVY','NAVY','NAVY','NAVY','NAVY',_],
+    [_,'GOLD','GOLD','GOLD','GOLD','GOLD','GOLD',_],
+    [_,_,'SKIN','SKIN','SKIN','SKIN',_,_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN',_,_],
+    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN_DK',_,_],
+    [_,'BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT',_,_],
+    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
+    [_,_,_,'CREAM_DK','CREAM_DK',_,_,_],
+    [_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_,_],
+    [_,_,'WALL_DARK','WALL_DARK',_,_,_,_],
+  ],
+  [
+    [_,_,'NAVY','NAVY','NAVY','NAVY',_,_],
+    [_,'NAVY','NAVY','NAVY','NAVY','NAVY','NAVY',_],
+    [_,'GOLD','GOLD','GOLD','GOLD','GOLD','GOLD',_],
+    [_,_,'SKIN','SKIN','SKIN','SKIN',_,_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN',_,_],
+    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN_DK',_,_],
+    [_,'BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT',_,_],
+    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
+    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
+    [_,'WALL_DARK','WALL_DARK',_,'WALL_DARK',_,_,_],
+    [_,'WALL_DARK','WALL_DARK',_,'WALL_DARK',_,_,_],
+  ],
+  [
+    [_,_,'NAVY','NAVY','NAVY','NAVY',_,_],
+    [_,'NAVY','NAVY','NAVY','NAVY','NAVY','NAVY',_],
+    [_,'GOLD','GOLD','GOLD','GOLD','GOLD','GOLD',_],
+    [_,_,'SKIN','SKIN','SKIN','SKIN',_,_],
+    [_,'SKIN','SKIN','SKIN','SKIN','SKIN',_,_],
+    [_,'SKIN_DK','SKIN','SKIN','SKIN','SKIN_DK',_,_],
+    [_,'BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'GOLD_BTN','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY',_,_],
+    [_,'BURGUNDY_LT','BURGUNDY','BURGUNDY','BURGUNDY','BURGUNDY_LT',_,_],
+    [_,_,'CREAM_DK','CREAM_DK','CREAM_DK',_,_,_],
+    [_,_,_,'CREAM_DK','CREAM_DK',_,_,_],
+    [_,_,'WALL_DARK','WALL_DARK',_,_,_,_],
+    [_,'WALL_DARK','WALL_DARK','WALL_DARK',_,_,_,_],
+  ],
+];
+
+// Right-facing: mirror of left
+function mirrorGrid(grid) {
+  return grid.map(frame => frame.map(row => [...row].reverse()));
+}
+const BELLHOP_RIGHT = mirrorGrid(BELLHOP_LEFT);
+
+export const BELLHOP_SPRITES = {
+  down:  BELLHOP_DOWN,
+  up:    BELLHOP_UP,
+  left:  BELLHOP_LEFT,
+  right: BELLHOP_RIGHT,
+};
