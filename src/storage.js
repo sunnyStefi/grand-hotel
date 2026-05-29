@@ -1,4 +1,4 @@
-const KEY = 'grand-hotel-save';
+const KEY = 'grand-hotel-save-v2';
 
 export function saveState(state) {
   const data = {

@@ -5,6 +5,8 @@ export const PALETTE = {
   EYE:       '#26334A',
   WHITE:     '#FFFFFF',
   UNIFORM:   '#C0392B',
+  CHEEK:     '#FF9EB0',
+  MOUTH:     '#7A3030',
 
   BURGUNDY:  '#6B2737',
   BURGUNDY_LT: '#8B3A4A',
@@ -49,16 +51,20 @@ const S = 'HAT';
 const E = 'EYE';
 const T = 'UNIFORM';
 const G = 'GOLD';
+const C = 'CHEEK';
+const M = 'MOUTH';
+const W = 'WHITE';
 
+// Big round head, sparkly eyes, rosy cheeks, a little smile — pure bellhop charm.
 const BELLHOP_DOWN = [
   [_,_,_,_,_,O,O,_,O,O,_,_,_,_,_,_],
   [_,_,_,_,O,S,S,S,S,S,O,_,_,_,_,_],
   [_,_,_,O,G,G,G,G,G,G,G,O,_,_,_,_],
   [_,_,O,F,F,F,F,F,F,F,F,F,O,_,_,_],
   [_,O,F,F,F,F,F,F,F,F,F,F,F,O,_,_],
-  [_,O,F,F,_,_,E,_,E,_,_,F,F,O,_,_],
-  [_,O,F,F,_,_,_,_,_,_,_,F,F,O,_,_],
-  [_,O,F,F,_,_,_,_,_,_,_,F,F,O,_,_],
+  [_,O,F,F,W,E,F,F,F,E,W,F,F,O,_,_],
+  [_,O,F,F,E,E,F,F,F,E,E,F,F,O,_,_],
+  [_,O,F,C,F,F,M,M,M,F,F,C,F,O,_,_],
   [_,O,T,T,T,T,T,T,T,T,T,T,T,O,_,_],
   [_,_,T,T,T,_,G,_,T,T,T,_,_,_,_,_],
   [_,_,_,T,T,T,T,T,T,T,_,_,_,_,_,_],
@@ -66,6 +72,25 @@ const BELLHOP_DOWN = [
   [_,_,_,_,_,S,S,S,S,_,_,_,_,_,_,_],
   [_,_,_,_,_,S,S,S,S,_,_,_,_,_,_,_],
   [_,_,_,_,_,O,O,O,O,_,_,_,_,_,_,_],
+  [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+];
+
+const BELLHOP_DOWN_STEP = [
+  [_,_,_,_,_,O,O,_,O,O,_,_,_,_,_,_],
+  [_,_,_,_,O,S,S,S,S,S,O,_,_,_,_,_],
+  [_,_,_,O,G,G,G,G,G,G,G,O,_,_,_,_],
+  [_,_,O,F,F,F,F,F,F,F,F,F,O,_,_,_],
+  [_,O,F,F,F,F,F,F,F,F,F,F,F,O,_,_],
+  [_,O,F,F,W,E,F,F,F,E,W,F,F,O,_,_],
+  [_,O,F,F,E,E,F,F,F,E,E,F,F,O,_,_],
+  [_,O,F,C,F,F,M,M,M,F,F,C,F,O,_,_],
+  [_,O,T,T,T,T,T,T,T,T,T,T,T,O,_,_],
+  [_,_,T,T,T,_,G,_,T,T,T,_,_,_,_,_],
+  [_,_,_,T,T,T,T,T,T,T,_,_,_,_,_,_],
+  [_,_,_,_,T,T,T,T,T,_,_,_,_,_,_,_],
+  [_,_,_,_,S,S,_,S,S,_,_,_,_,_,_,_],
+  [_,_,_,_,S,S,_,S,S,_,_,_,_,_,_,_],
+  [_,_,_,_,O,O,_,O,O,_,_,_,_,_,_,_],
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
 ];
 
@@ -75,8 +100,8 @@ const BELLHOP_UP = [
   [_,_,_,O,G,G,G,G,G,G,G,O,_,_,_,_],
   [_,_,O,S,S,S,S,S,S,S,S,S,O,_,_,_],
   [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
-  [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
-  [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
+  [_,O,F,S,S,S,S,S,S,S,S,S,F,O,_,_],
+  [_,O,F,S,S,S,S,S,S,S,S,S,F,O,_,_],
   [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
   [_,O,T,T,T,T,T,T,T,T,T,T,T,O,_,_],
   [_,_,T,T,T,_,G,_,T,T,T,_,_,_,_,_],
@@ -88,15 +113,34 @@ const BELLHOP_UP = [
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
 ];
 
+const BELLHOP_UP_STEP = [
+  [_,_,_,_,_,O,O,_,O,O,_,_,_,_,_,_],
+  [_,_,_,_,O,S,S,S,S,S,O,_,_,_,_,_],
+  [_,_,_,O,G,G,G,G,G,G,G,O,_,_,_,_],
+  [_,_,O,S,S,S,S,S,S,S,S,S,O,_,_,_],
+  [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
+  [_,O,F,S,S,S,S,S,S,S,S,S,F,O,_,_],
+  [_,O,F,S,S,S,S,S,S,S,S,S,F,O,_,_],
+  [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
+  [_,O,T,T,T,T,T,T,T,T,T,T,T,O,_,_],
+  [_,_,T,T,T,_,G,_,T,T,T,_,_,_,_,_],
+  [_,_,_,T,T,T,T,T,T,T,_,_,_,_,_,_],
+  [_,_,_,_,T,T,T,T,T,_,_,_,_,_,_,_],
+  [_,_,_,_,S,S,_,S,S,_,_,_,_,_,_,_],
+  [_,_,_,_,S,S,_,S,S,_,_,_,_,_,_,_],
+  [_,_,_,_,O,O,_,O,O,_,_,_,_,_,_,_],
+  [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+];
+
 const BELLHOP_LEFT = [
   [_,_,_,_,O,O,_,O,O,_,_,_,_,_,_,_],
   [_,_,_,O,S,S,S,S,S,O,_,_,_,_,_,_],
   [_,_,O,G,G,G,G,G,G,G,O,_,_,_,_,_],
   [_,O,F,F,F,F,F,F,F,F,S,S,O,_,_,_],
   [_,O,F,F,F,F,F,F,F,F,S,S,O,_,_,_],
-  [_,O,F,F,F,_,E,_,F,F,S,S,O,_,_,_],
-  [_,O,F,F,F,_,_,_,F,F,S,S,O,_,_,_],
-  [_,O,F,F,F,_,_,_,F,F,S,S,O,_,_,_],
+  [_,O,F,F,W,E,F,F,F,F,S,S,O,_,_,_],
+  [_,O,F,F,E,E,F,F,F,F,S,S,O,_,_,_],
+  [_,O,F,M,M,C,F,F,F,F,S,S,O,_,_,_],
   [_,O,T,T,T,T,T,T,T,T,T,T,O,_,_,_],
   [_,_,T,T,T,_,G,T,T,T,T,_,_,_,_,_],
   [_,_,_,T,T,T,T,T,T,T,_,_,_,_,_,_],
@@ -107,15 +151,34 @@ const BELLHOP_LEFT = [
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
 ];
 
+const BELLHOP_LEFT_STEP = [
+  [_,_,_,_,O,O,_,O,O,_,_,_,_,_,_,_],
+  [_,_,_,O,S,S,S,S,S,O,_,_,_,_,_,_],
+  [_,_,O,G,G,G,G,G,G,G,O,_,_,_,_,_],
+  [_,O,F,F,F,F,F,F,F,F,S,S,O,_,_,_],
+  [_,O,F,F,F,F,F,F,F,F,S,S,O,_,_,_],
+  [_,O,F,F,W,E,F,F,F,F,S,S,O,_,_,_],
+  [_,O,F,F,E,E,F,F,F,F,S,S,O,_,_,_],
+  [_,O,F,M,M,C,F,F,F,F,S,S,O,_,_,_],
+  [_,O,T,T,T,T,T,T,T,T,T,T,O,_,_,_],
+  [_,_,T,T,T,_,G,T,T,T,T,_,_,_,_,_],
+  [_,_,_,T,T,T,T,T,T,T,_,_,_,_,_,_],
+  [_,_,_,_,T,T,T,T,T,_,_,_,_,_,_,_],
+  [_,_,_,_,S,S,_,_,S,S,_,_,_,_,_,_],
+  [_,_,_,_,S,S,_,_,S,S,_,_,_,_,_,_],
+  [_,_,_,_,O,O,_,_,O,O,_,_,_,_,_,_],
+  [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+];
+
 const BELLHOP_RIGHT = [
   [_,_,_,_,_,_,_,O,O,_,O,O,_,_,_,_],
   [_,_,_,_,_,O,S,S,S,S,S,O,_,_,_,_],
   [_,_,_,_,O,G,G,G,G,G,G,G,O,_,_,_],
   [_,_,_,O,S,S,F,F,F,F,F,F,F,O,_,_],
   [_,_,_,O,S,S,F,F,F,F,F,F,F,O,_,_],
-  [_,_,_,O,S,S,F,F,_,E,_,F,F,F,O,_],
-  [_,_,_,O,S,S,F,F,_,_,_,F,F,F,O,_],
-  [_,_,_,O,S,S,F,F,_,_,_,F,F,F,O,_],
+  [_,_,_,O,S,S,F,F,F,E,W,F,F,F,O,_],
+  [_,_,_,O,S,S,F,F,F,E,E,F,F,F,O,_],
+  [_,_,_,O,S,S,F,F,F,C,M,M,F,F,O,_],
   [_,_,O,T,T,T,T,T,T,T,T,T,T,O,_,_],
   [_,_,_,_,T,T,T,T,G,_,T,T,T,_,_,_],
   [_,_,_,_,_,T,T,T,T,T,T,T,_,_,_,_],
@@ -126,11 +189,31 @@ const BELLHOP_RIGHT = [
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
 ];
 
+const BELLHOP_RIGHT_STEP = [
+  [_,_,_,_,_,_,_,O,O,_,O,O,_,_,_,_],
+  [_,_,_,_,_,O,S,S,S,S,S,O,_,_,_,_],
+  [_,_,_,_,O,G,G,G,G,G,G,G,O,_,_,_],
+  [_,_,_,O,S,S,F,F,F,F,F,F,F,O,_,_],
+  [_,_,_,O,S,S,F,F,F,F,F,F,F,O,_,_],
+  [_,_,_,O,S,S,F,F,F,E,W,F,F,F,O,_],
+  [_,_,_,O,S,S,F,F,F,E,E,F,F,F,O,_],
+  [_,_,_,O,S,S,F,F,F,C,M,M,F,F,O,_],
+  [_,_,O,T,T,T,T,T,T,T,T,T,T,O,_,_],
+  [_,_,_,_,T,T,T,T,G,_,T,T,T,_,_,_],
+  [_,_,_,_,_,T,T,T,T,T,T,T,_,_,_,_],
+  [_,_,_,_,_,_,T,T,T,T,T,_,_,_,_,_],
+  [_,_,_,_,_,S,S,_,_,S,S,_,_,_,_,_],
+  [_,_,_,_,_,S,S,_,_,S,S,_,_,_,_,_],
+  [_,_,_,_,_,O,O,_,_,O,O,_,_,_,_,_],
+  [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+];
+
+// Hold each pose ~240ms for a gentle waddle (walkFrame advances every 120ms).
 export const BELLHOP_SPRITES = {
-  down:  [BELLHOP_DOWN, BELLHOP_DOWN, BELLHOP_DOWN, BELLHOP_DOWN],
-  up:    [BELLHOP_UP, BELLHOP_UP, BELLHOP_UP, BELLHOP_UP],
-  left:  [BELLHOP_LEFT, BELLHOP_LEFT, BELLHOP_LEFT, BELLHOP_LEFT],
-  right: [BELLHOP_RIGHT, BELLHOP_RIGHT, BELLHOP_RIGHT, BELLHOP_RIGHT],
+  down:  [BELLHOP_DOWN, BELLHOP_DOWN, BELLHOP_DOWN_STEP, BELLHOP_DOWN_STEP],
+  up:    [BELLHOP_UP, BELLHOP_UP, BELLHOP_UP_STEP, BELLHOP_UP_STEP],
+  left:  [BELLHOP_LEFT, BELLHOP_LEFT, BELLHOP_LEFT_STEP, BELLHOP_LEFT_STEP],
+  right: [BELLHOP_RIGHT, BELLHOP_RIGHT, BELLHOP_RIGHT_STEP, BELLHOP_RIGHT_STEP],
 };
 
 export function getBellhopSprites(floorNum) {

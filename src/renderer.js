@@ -349,9 +349,16 @@ function _drawDoor(ctx, x, y, S, d, floorNum = 1) {
   ctx.strokeRect(x + 1, y + 1, S - 2, S - 2);
 
   const text = String(d.value);
-  ctx.font = 'bold 10px monospace';
+  const baseFontSize = 10;
+  const fontSize = baseFontSize + Math.min(floorNum - 1, 4) * 0.8;
+  ctx.font = `bold ${fontSize}px monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+
+  // Add text shadow for sharpness
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillText(text, x + S / 2 + 0.5, y + S / 2 + 0.5);
+
   ctx.fillStyle = '#FFFFFF';
   ctx.fillText(text, x + S / 2, y + S / 2);
 
@@ -404,7 +411,9 @@ export function drawSumBanner(ctx, junction, sum, maze, floorNum = 1) {
   const cy = junction.row * CELL_SIZE + (offset * CELL_SIZE);
 
   const text = `${sum.a} ${sum.operator} ${sum.b} = ?`;
-  ctx.font = 'bold 12px monospace';
+  const baseFontSize = 12;
+  const fontSize = baseFontSize + Math.min(floorNum - 1, 4) * 0.8;
+  ctx.font = `bold ${fontSize}px monospace`;
   const pad = 7;
   const tw = ctx.measureText(text).width;
   const bw = tw + pad * 2;
@@ -428,10 +437,13 @@ export function drawSumBanner(ctx, junction, sum, maze, floorNum = 1) {
   _roundRect(ctx, cx - bw / 2, cy - bh / 2, bw, bh, 4);
   ctx.stroke();
 
-  // Text
-  ctx.fillStyle = '#FFFFFF';
+  // Text with shadow for sharpness
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  ctx.fillText(text, cx + 0.5, cy + 0.5);
+
+  ctx.fillStyle = '#FFFFFF';
   ctx.fillText(text, cx, cy);
 }
 
@@ -574,7 +586,8 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
   // Floor badge (hotel room number plate style)
   if (showFloor) {
     const floorText = `FLOOR ${state.currentFloor}`;
-    ctx.font = 'bold 9px monospace';
+    const floorFontSize = 9 + Math.min(state.currentFloor - 1, 4) * 0.6;
+    ctx.font = `bold ${floorFontSize}px monospace`;
     const fw = ctx.measureText(floorText).width + 10;
     ctx.fillStyle = P.WOOD_MID;
     _roundRect(ctx, W / 2 - fw / 2, 2, fw, 12, 2);
@@ -611,7 +624,8 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
   if (state.streak >= 2) {
     const mult = state.streak >= 4 ? 2.5 : state.streak === 3 ? 2.0 : 1.5;
     const comboText = `×${mult} COMBO`;
-    ctx.font = 'bold 9px monospace';
+    const comboFontSize = 9 + Math.min(state.currentFloor - 1, 4) * 0.6;
+    ctx.font = `bold ${comboFontSize}px monospace`;
     const cw = ctx.measureText(comboText).width + 10;
     ctx.fillStyle = P.BURGUNDY;
     _roundRect(ctx, 2, H - 14, cw, 12, 2);
@@ -653,7 +667,8 @@ export function drawBuildScreen(ctx, state, selectedIdx, W, H) {
   _drawHotelSilhouette(ctx, state.hotel, W);
 
   ctx.fillStyle = P.GOLD_LT;
-  ctx.font = 'bold 10px monospace';
+  const titleFontSize = 10 + Math.min(state.currentFloor - 1, 4) * 0.6;
+  ctx.font = `bold ${titleFontSize}px monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   ctx.fillText('GRAND HOTEL GOLD', W / 2, 18);
@@ -663,7 +678,8 @@ export function drawBuildScreen(ctx, state, selectedIdx, W, H) {
   ctx.fillText('★'.repeat(stars) + '☆'.repeat(3 - stars), W / 2, 30);
 
   ctx.fillStyle = P.CREAM;
-  ctx.font = '9px monospace';
+  const bankFontSize = 9 + Math.min(state.currentFloor - 1, 4) * 0.5;
+  ctx.font = `${bankFontSize}px monospace`;
   ctx.fillText(`Bank: $${Math.floor(state.money)}`, W / 2, 42);
 
   const items = _buildItems(state);
@@ -672,7 +688,8 @@ export function drawBuildScreen(ctx, state, selectedIdx, W, H) {
     const selected = i === selectedIdx;
     ctx.fillStyle = selected ? P.GOLD : (item.locked ? P.WALL_LT : P.CREAM);
     ctx.textAlign = 'left';
-    ctx.font = selected ? 'bold 8px monospace' : '8px monospace';
+    const itemFontSize = 8 + Math.min(state.currentFloor - 1, 4) * 0.4;
+    ctx.font = selected ? `bold ${itemFontSize}px monospace` : `${itemFontSize}px monospace`;
     const prefix = selected ? '▶ ' : '  ';
     const suffix = item.locked ? ' (locked)' : item.canAfford ? '' : ` ($${item.cost})`;
     ctx.fillText(`${prefix}${item.label}${suffix}`, 8, iy);
@@ -680,7 +697,8 @@ export function drawBuildScreen(ctx, state, selectedIdx, W, H) {
 
   const ny = H - 14;
   ctx.fillStyle = selectedIdx === items.length ? P.GOLD_LT : P.CREAM;
-  ctx.font = selectedIdx === items.length ? 'bold 9px monospace' : '9px monospace';
+  const nextFloorFontSize = 9 + Math.min(state.currentFloor - 1, 4) * 0.5;
+  ctx.font = selectedIdx === items.length ? `bold ${nextFloorFontSize}px monospace` : `${nextFloorFontSize}px monospace`;
   ctx.textAlign = 'center';
   ctx.fillText(selectedIdx === items.length ? '▶ NEXT FLOOR ◀' : 'NEXT FLOOR  (↓)', W / 2, ny);
 
