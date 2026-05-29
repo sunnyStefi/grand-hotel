@@ -1,21 +1,21 @@
-// ─── Cute Cozy Pixel Rabbit Pack ─────────────────────────────────────────────
+// ─── Cute Cozy Pixel Bellhop Pack ────────────────────────────────────────────
 export const PALETTE = {
-  // Rabbit outline
-  CAT_OUTLINE: '#3F2C2A',
-  // Soft cream fur
-  CAT_FUR: '#FFE9C9',
-  // Gentle shading
-  CAT_SHADE: '#F5D6B0',
-  // Big sparkling eyes
+  // Outline / uniform details
+  CAT_OUTLINE: '#2C2C2C',
+  // Skin tone
+  CAT_FUR: '#FFDBB4',
+  // Hair / hat shade
+  CAT_SHADE: '#2C2C2C',
+  // Eyes
   CAT_EYES: '#26334A',
-  // Eye highlights
+  // Eye sparkle
   CAT_WHITE: '#FFFFFF',
-  // Tiny pink nose
+  // Mouth
   CAT_NOSE: '#FF7A9E',
-  // Blush cheeks
+  // Blush
   BLUSH: '#FFBCCF',
-  // Inner ear pink
-  CAT_TAIL: '#FF9EB8',
+  // Uniform red
+  CAT_TAIL: '#C0392B',
 
   // Environment palette (unchanged)
   BURGUNDY: '#6B2737',
@@ -65,100 +65,99 @@ const E = 'CAT_EYES';
 const H = 'CAT_WHITE';
 const B = 'BLUSH';
 const N = 'CAT_NOSE';
-const T = 'CAT_TAIL';
+const T = 'CAT_TAIL'; // uniform red
+const G = 'GOLD';
 
-// ─── Cute Rabbit Sprites (Big Ears + Round Shape) ───────────────────────────
+// ─── Cute Bellhop Sprites (Person Shape) ────────────────────────────────────
 
-// DOWN - Front view with tall floppy ears
-const RABBIT_DOWN = [
-  [_,_,_,O,O,O,O,O,O,O,O,O,_,_,_,_],
-  [_,_,O,F,F,F,F,F,F,F,F,F,O,_,_,_],
-  [_,O,F,F,T,T,_,_,_,T,T,F,F,O,_,_],
-  [_,O,F,T,T,T,_,_,_,T,T,T,F,O,_,_],
-  [_,O,F,T,T,F,F,F,F,F,T,T,F,O,_,_],
-  [_,O,F,F,F,E,H,E,E,H,E,F,F,O,_,_],
-  [_,O,F,F,F,E,H,E,E,H,E,F,F,O,_,_],
-  [_,O,F,F,F,F,N,F,F,N,F,F,F,O,_,_],
-  [_,O,F,F,B,B,F,F,F,F,B,B,F,O,_,_],
-  [_,O,F,F,F,F,F,F,F,F,F,F,F,O,_,_],
-  [_,_,O,F,F,F,F,F,F,F,F,F,O,_,_,_],
-  [_,_,_,O,O,F,F,F,F,F,O,O,_,_,_,_],
+// DOWN - Front view (more human proportions)
+const BELLHOP_DOWN = [
   [_,_,_,_,_,O,O,O,O,O,_,_,_,_,_,_],
-  [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+  [_,_,_,_,O,S,S,S,S,S,O,_,_,_,_,_],
+  [_,_,_,O,S,S,S,S,S,S,S,O,_,_,_,_],
+  [_,_,O,F,F,F,F,F,F,F,F,F,O,_,_,_],
+  [_,O,F,F,E,H,E,F,F,E,H,F,F,O,_,_],
+  [_,O,F,F,E,H,E,F,F,E,H,F,F,O,_,_],
+  [_,O,F,F,F,N,F,F,F,N,F,F,F,O,_,_],
+  [_,O,T,T,T,T,T,T,T,T,T,T,T,O,_,_],
+  [_,O,T,G,G,T,T,T,T,T,G,G,T,O,_,_],
+  [_,O,T,T,T,T,T,T,T,T,T,T,T,O,_,_],
+  [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
+  [_,O,S,S,S,S,_,_,_,S,S,S,S,O,_,_],
+  [_,O,S,S,_,_,_,_,_,_,_,S,S,O,_,_],
+  [_,_,O,O,_,_,_,_,_,_,_,O,O,_,_,_],
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
 ];
 
-// UP - Back view with ears folded back
-const RABBIT_UP = [
-  [_,_,_,_,O,O,O,O,O,O,O,_,_,_,_,_],
-  [_,_,O,O,F,F,T,T,T,F,F,O,O,_,_,_],
-  [_,O,F,F,F,T,T,T,T,T,F,F,F,O,_,_],
-  [_,O,F,F,F,T,T,F,F,T,T,F,F,O,_,_],
-  [_,O,F,F,F,F,F,F,F,F,F,F,F,O,_,_],
-  [_,O,F,F,F,F,F,F,F,F,F,F,F,O,_,_],
-  [_,O,F,F,F,F,F,F,F,F,F,F,F,O,_,_],
-  [_,O,F,F,F,F,F,F,F,F,F,F,F,O,_,_],
-  [_,O,F,F,F,F,F,F,F,F,F,F,F,O,_,_],
-  [_,O,F,F,F,F,F,F,F,F,F,F,F,O,_,_],
-  [_,_,O,F,F,F,F,F,F,F,F,F,O,_,_,_],
-  [_,_,_,O,F,F,F,F,F,F,F,O,_,_,_,_],
-  [_,_,_,_,O,O,F,F,F,O,O,_,_,_,_,_],
-  [_,_,_,_,_,_,O,O,O,_,_,_,_,_,_,_],
+// UP - Back view
+const BELLHOP_UP = [
+  [_,_,_,_,_,O,O,O,O,O,_,_,_,_,_,_],
+  [_,_,_,O,O,S,S,S,S,S,O,O,_,_,_,_],
+  [_,_,O,S,S,S,S,S,S,S,S,S,O,_,_,_],
+  [_,O,S,S,T,T,T,T,T,T,T,S,S,O,_,_],
+  [_,O,S,T,T,T,T,T,T,T,T,T,S,O,_,_],
+  [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
+  [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
+  [_,O,T,T,T,T,T,T,T,T,T,T,T,O,_,_],
+  [_,O,T,G,G,T,T,T,T,T,G,G,T,O,_,_],
+  [_,O,T,T,T,T,T,T,T,T,T,T,T,O,_,_],
+  [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
+  [_,O,S,S,S,S,S,S,S,S,S,S,S,O,_,_],
+  [_,_,O,S,S,S,S,S,S,S,S,S,O,_,_,_],
+  [_,_,_,O,O,O,O,O,O,O,O,O,_,_,_,_],
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
 ];
 
 // LEFT
-const RABBIT_LEFT = [
-  [_,_,_,_,_,O,O,O,O,O,O,_,_,_,_,_],
-  [_,_,_,O,O,F,F,T,T,F,F,O,_,_,_,_],
-  [_,_,O,F,F,F,T,T,T,F,F,F,O,_,_,_],
-  [_,O,F,F,F,T,T,T,T,F,F,F,F,O,_,_],
-  [_,O,F,F,E,H,E,F,F,F,F,F,F,O,_,_],
-  [_,O,F,F,E,H,E,F,F,F,F,F,F,O,_,_],
-  [_,O,F,F,F,N,F,F,F,F,F,F,F,O,_,_],
-  [_,O,F,B,B,F,F,F,F,F,F,F,F,O,_,_],
-  [_,O,F,F,F,F,F,F,F,F,F,F,F,O,_,_],
-  [_,O,F,F,F,F,F,F,F,F,F,F,O,_,_,_],
-  [_,_,O,F,F,F,F,F,F,F,F,O,_,_,_,_],
-  [_,_,_,O,F,F,F,F,F,F,O,_,_,_,_,_],
+const BELLHOP_LEFT = [
   [_,_,_,_,O,O,O,O,O,O,_,_,_,_,_,_],
-  [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+  [_,_,_,O,S,S,S,S,S,S,O,_,_,_,_,_],
+  [_,_,O,S,F,F,F,F,F,S,S,O,_,_,_,_],
+  [_,O,S,F,F,E,H,E,F,F,S,S,O,_,_,_],
+  [_,O,S,F,F,E,H,E,F,F,S,S,O,_,_,_],
+  [_,O,S,F,F,F,N,F,F,F,S,S,O,_,_,_],
+  [_,O,T,T,T,T,T,T,T,T,T,S,O,_,_,_],
+  [_,O,T,G,T,T,T,T,T,T,T,S,O,_,_,_],
+  [_,O,T,T,T,T,T,T,T,T,T,S,O,_,_,_],
+  [_,O,S,S,S,S,S,S,S,S,S,S,O,_,_,_],
+  [_,O,S,S,S,S,S,S,S,S,S,S,O,_,_,_],
+  [_,O,S,S,S,S,S,S,S,S,S,O,_,_,_,_],
+  [_,_,O,S,S,S,S,S,S,S,O,_,_,_,_,_],
+  [_,_,_,O,O,O,O,O,O,O,_,_,_,_,_,_],
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
 ];
 
 // RIGHT
-const RABBIT_RIGHT = [
-  [_,_,_,_,_,_,O,O,O,O,O,O,_,_,_,_],
-  [_,_,_,_,O,F,F,T,T,F,F,O,O,_,_,_],
-  [_,_,_,O,F,F,T,T,T,F,F,F,F,O,_,_],
-  [_,_,O,F,F,T,T,T,T,T,F,F,F,O,_,_],
-  [_,_,O,F,F,F,F,F,E,H,E,F,F,O,_,_],
-  [_,_,O,F,F,F,F,F,E,H,E,F,F,O,_,_],
-  [_,_,O,F,F,F,F,F,F,N,F,F,F,O,_,_],
-  [_,_,O,F,F,F,F,F,F,B,B,F,F,O,_,_],
-  [_,_,O,F,F,F,F,F,F,F,F,F,F,O,_,_],
-  [_,_,_,O,F,F,F,F,F,F,F,F,O,_,_,_],
-  [_,_,_,_,O,F,F,F,F,F,F,O,_,_,_,_],
-  [_,_,_,_,_,O,F,F,F,F,O,_,_,_,_,_],
-  [_,_,_,_,_,_,O,O,O,O,_,_,_,_,_,_],
+const BELLHOP_RIGHT = [
+  [_,_,_,_,_,O,O,O,O,O,O,_,_,_,_,_],
+  [_,_,_,_,O,S,S,S,S,S,S,O,_,_,_,_],
+  [_,_,_,O,S,S,F,F,F,F,S,S,O,_,_,_],
+  [_,_,O,S,F,F,E,H,E,F,F,S,O,_,_,_],
+  [_,_,O,S,F,F,E,H,E,F,F,S,O,_,_,_],
+  [_,_,O,S,F,F,F,N,F,F,F,S,O,_,_,_],
+  [_,_,O,S,T,T,T,T,T,T,T,T,O,_,_,_],
+  [_,_,O,S,T,T,T,T,T,G,T,O,_,_,_,_],
+  [_,_,O,S,T,T,T,T,T,T,T,O,_,_,_,_],
+  [_,_,O,S,S,S,S,S,S,S,S,O,_,_,_,_],
+  [_,_,O,S,S,S,S,S,S,S,S,O,_,_,_,_],
+  [_,_,_,O,S,S,S,S,S,S,S,O,_,_,_,_],
+  [_,_,_,_,O,O,O,O,O,O,O,_,_,_,_,_],
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
   [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
 ];
 
 // ─── Sprite set export ──────────────────────────────────────────────────────
-const RABBIT_SPRITES = {
-  down:  [RABBIT_DOWN, RABBIT_DOWN, RABBIT_DOWN, RABBIT_DOWN],
-  up:    [RABBIT_UP, RABBIT_UP, RABBIT_UP, RABBIT_UP],
-  left:  [RABBIT_LEFT, RABBIT_LEFT, RABBIT_LEFT, RABBIT_LEFT],
-  right: [RABBIT_RIGHT, RABBIT_RIGHT, RABBIT_RIGHT, RABBIT_RIGHT],
+export const BELLHOP_SPRITES = {
+  down:  [BELLHOP_DOWN, BELLHOP_DOWN, BELLHOP_DOWN, BELLHOP_DOWN],
+  up:    [BELLHOP_UP, BELLHOP_UP, BELLHOP_UP, BELLHOP_UP],
+  left:  [BELLHOP_LEFT, BELLHOP_LEFT, BELLHOP_LEFT, BELLHOP_LEFT],
+  right: [BELLHOP_RIGHT, BELLHOP_RIGHT, BELLHOP_RIGHT, BELLHOP_RIGHT],
 };
 
 export function getCatSpritesForFloor(floorNum) {
-  return RABBIT_SPRITES;
+  return BELLHOP_SPRITES;
 }
-
-export const BELLHOP_SPRITES = RABBIT_SPRITES;
