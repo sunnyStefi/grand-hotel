@@ -5,105 +5,96 @@ import { t } from './i18n.js';
 
 const P = PALETTE;
 
-// ─── Wallpaper patterns (per floor) ───────────────────────────────────────────
-let wallpaperPatterns = {};
+export const MAX_FLOOR = 100;
 
-function buildWallpaperPatterns(ctx) {
+// ─── Procedural per-floor theming ──────────────────────────────────────────────
+// Each floor gets its own color palette. The hue advances a little every floor
+// (~3.6° per step) so floors 1..100 each look distinct and the climb sweeps a
+// full color wheel. Geometry style cycles for extra texture variety.
+function hsl(h, s, l) {
+  return `hsl(${(((h % 360) + 360) % 360).toFixed(1)}, ${s}%, ${l}%)`;
+}
+
+export function getFloorTheme(floorNum = 1) {
+  const n = Math.max(1, floorNum);
+  const h = ((n - 1) * (360 / MAX_FLOOR));   // ~3.6° per floor → 100 hues
+  const styleIdx = (n - 1) % 4;              // brick / dots / diagonal / ornate
+  return {
+    hue: h,
+    styleIdx,
+    wallBase:    hsl(h, 45, 28),
+    wallLight:   hsl(h, 50, 42),
+    wallDark:    hsl(h, 50, 16),
+    wallAccent:  hsl(h, 35, 62),
+    floorLight:  hsl(h, 38, 84),
+    floorDark:   hsl(h, 38, 70),
+    door:        hsl(h, 55, 22),
+    badge:       hsl(h, 55, 24),
+    paperBase:   hsl(h, 48, 40),
+    paperAccent: hsl(h, 50, 28),
+    paperLight:  hsl(h, 45, 54),
+  };
+}
+
+// ─── Wallpaper patterns (per floor, cached) ────────────────────────────────────
+let _rendererCtx = null;
+const wallpaperCache = {};
+
+export function initRenderer(ctx) {
+  _rendererCtx = ctx;
+}
+
+function getWallpaper(floorNum, theme) {
+  if (wallpaperCache[floorNum]) return wallpaperCache[floorNum];
+  if (!_rendererCtx) return null;
+
   const size = 16;
+  const oc = document.createElement('canvas');
+  oc.width = size; oc.height = size;
+  const ox = oc.getContext('2d');
+  ox.fillStyle = theme.paperBase;
+  ox.fillRect(0, 0, size, size);
 
-  // Floor 1: Classic brick with warm browns
-  {
-    const oc = document.createElement('canvas');
-    oc.width = size; oc.height = size;
-    const ox = oc.getContext('2d');
-    ox.fillStyle = '#8B4513';
-    ox.fillRect(0, 0, size, size);
-    // Brick pattern - horizontal line every 8px
-    ox.strokeStyle = '#654321';
+  if (theme.styleIdx === 0) {
+    // Brick
+    ox.strokeStyle = theme.paperAccent;
     ox.lineWidth = 0.5;
-    ox.beginPath();
-    ox.moveTo(0, size / 2);
-    ox.lineTo(size, size / 2);
-    ox.stroke();
-    // Vertical brick divider
-    ox.beginPath();
-    ox.moveTo(size / 2, 0);
-    ox.lineTo(size / 2, size / 2);
-    ox.stroke();
-    ox.beginPath();
-    ox.moveTo(size / 2, size / 2);
-    ox.lineTo(size / 2, size);
-    ox.stroke();
-    // Shading
+    ox.beginPath(); ox.moveTo(0, size / 2); ox.lineTo(size, size / 2); ox.stroke();
+    ox.beginPath(); ox.moveTo(size / 2, 0); ox.lineTo(size / 2, size / 2); ox.stroke();
+    ox.beginPath(); ox.moveTo(size / 2, size / 2); ox.lineTo(size / 2, size); ox.stroke();
     ox.fillStyle = 'rgba(0,0,0,0.15)';
     ox.fillRect(0, size / 2 - 0.5, size, 1);
-    wallpaperPatterns[1] = ctx.createPattern(oc, 'repeat');
-  }
-
-  // Floor 2: Teal/turquoise with decorative dots
-  {
-    const oc = document.createElement('canvas');
-    oc.width = size; oc.height = size;
-    const ox = oc.getContext('2d');
-    ox.fillStyle = '#2D8A7D';
-    ox.fillRect(0, 0, size, size);
-    // Geometric pattern - circles
-    ox.fillStyle = '#1F5A54';
-    ox.beginPath();
-    ox.arc(size / 2, size / 2, 3, 0, Math.PI * 2);
-    ox.fill();
-    // Corner accents
+  } else if (theme.styleIdx === 1) {
+    // Decorative dots
+    ox.fillStyle = theme.paperAccent;
+    ox.beginPath(); ox.arc(size / 2, size / 2, 3, 0, Math.PI * 2); ox.fill();
     ox.fillStyle = 'rgba(255,255,255,0.1)';
     ox.fillRect(1, 1, 2, 2);
     ox.fillRect(size - 3, size - 3, 2, 2);
-    wallpaperPatterns[2] = ctx.createPattern(oc, 'repeat');
-  }
-
-  // Floor 3: Light blue/modern with subtle texture
-  {
-    const oc = document.createElement('canvas');
-    oc.width = size; oc.height = size;
-    const ox = oc.getContext('2d');
-    ox.fillStyle = '#5DA5D4';
-    ox.fillRect(0, 0, size, size);
+  } else if (theme.styleIdx === 2) {
     // Modern diagonal lines
-    ox.strokeStyle = '#4A8BC2';
+    ox.strokeStyle = theme.paperAccent;
     ox.lineWidth = 1;
     for (let i = 0; i < size * 2; i += 4) {
-      ox.beginPath();
-      ox.moveTo(i, 0);
-      ox.lineTo(i - size, size);
-      ox.stroke();
+      ox.beginPath(); ox.moveTo(i, 0); ox.lineTo(i - size, size); ox.stroke();
     }
-    // Light overlay
     ox.fillStyle = 'rgba(255,255,255,0.05)';
     ox.fillRect(0, 0, size, size);
-    wallpaperPatterns[3] = ctx.createPattern(oc, 'repeat');
-  }
-
-  // Floor 4: Purple/lavender with ornate pattern
-  {
-    const oc = document.createElement('canvas');
-    oc.width = size; oc.height = size;
-    const ox = oc.getContext('2d');
-    ox.fillStyle = '#9B6DB4';
-    ox.fillRect(0, 0, size, size);
-    // Ornate cross pattern (fancy)
-    ox.fillStyle = '#7A4F8C';
+  } else {
+    // Ornate cross
+    ox.fillStyle = theme.paperAccent;
     ox.fillRect(size / 2 - 1, 0, 2, size);
     ox.fillRect(0, size / 2 - 1, size, 2);
-    // Decorative corners
-    ox.fillStyle = '#D4A5E8';
+    ox.fillStyle = theme.paperLight;
     ox.fillRect(1, 1, 3, 3);
     ox.fillRect(size - 4, 1, 3, 3);
     ox.fillRect(1, size - 4, 3, 3);
     ox.fillRect(size - 4, size - 4, 3, 3);
-    wallpaperPatterns[4] = ctx.createPattern(oc, 'repeat');
   }
-}
 
-export function initRenderer(ctx) {
-  buildWallpaperPatterns(ctx);
+  const pat = _rendererCtx.createPattern(oc, 'repeat');
+  wallpaperCache[floorNum] = pat;
+  return pat;
 }
 
 // ─── Coin rendering ──────────────────────────────────────────────────────────
@@ -177,9 +168,10 @@ export function drawMaze(ctx, maze, doorOverlays, floorNum = 1) {
   const H = maze.length * CELL_SIZE;
 
   // Wallpaper background (per floor)
-  const floorMod = ((floorNum - 1) % 4) + 1;
-  if (wallpaperPatterns[floorMod]) {
-    ctx.fillStyle = wallpaperPatterns[floorMod];
+  const theme = getFloorTheme(floorNum);
+  const pattern = getWallpaper(floorNum, theme);
+  if (pattern) {
+    ctx.fillStyle = pattern;
     ctx.fillRect(0, 0, W, H);
   }
 
@@ -193,16 +185,16 @@ export function drawMaze(ctx, maze, doorOverlays, floorNum = 1) {
       const S = CELL_SIZE;
 
       if (cell === WALL) {
-        _drawWall(ctx, x, y, S, row, floorNum);
+        _drawWall(ctx, x, y, S, row, theme);
       } else if (cell === FLOOR) {
-        _drawFloor(ctx, x, y, S, row, col, floorOffset, floorNum);
+        _drawFloor(ctx, x, y, S, row, col, floorOffset, theme);
       } else if (cell === DOOR_JUNCTION) {
-        _drawFloor(ctx, x, y, S, row, col, floorOffset, floorNum);
+        _drawFloor(ctx, x, y, S, row, col, floorOffset, theme);
         ctx.strokeStyle = P.GOLD;
         ctx.lineWidth = 1;
         ctx.strokeRect(x + 1, y + 1, S - 2, S - 2);
       } else if (cell === STASH) {
-        _drawFloor(ctx, x, y, S, row, col, floorOffset, floorNum);
+        _drawFloor(ctx, x, y, S, row, col, floorOffset, theme);
         // Glow aura
         ctx.fillStyle = 'rgba(212,160,23,0.15)';
         ctx.beginPath();
@@ -243,66 +235,39 @@ export function drawMaze(ctx, maze, doorOverlays, floorNum = 1) {
   }
 }
 
-function _drawWall(ctx, x, y, S, row, floorNum = 1) {
-  const floorMod = (floorNum - 1) % 4;
+function _drawWall(ctx, x, y, S, row, theme) {
+  // Base + bevel (lit top-left, shaded bottom-right) — recolored per floor hue
+  ctx.fillStyle = theme.wallBase;
+  ctx.fillRect(x, y, S, S);
+  ctx.fillStyle = theme.wallLight;
+  ctx.fillRect(x, y, S, 2);
+  ctx.fillRect(x, y, 2, S);
+  ctx.fillStyle = theme.wallDark;
+  ctx.fillRect(x, y + S - 2, S, 2);
+  ctx.fillRect(x + S - 2, y, 2, S);
 
-  if (floorMod === 0) {
-    // Floor 1: Classic dark brick
-    ctx.fillStyle = '#6B3410';
-    ctx.fillRect(x, y, S, S);
-    ctx.fillStyle = '#8B4513';
-    ctx.fillRect(x, y, S, 2);
-    ctx.fillRect(x, y, 2, S);
-    ctx.fillStyle = '#4A2410';
-    ctx.fillRect(x, y + S - 2, S, 2);
-    ctx.fillRect(x + S - 2, y, 2, S);
-    // Brick pattern
-    ctx.fillStyle = '#5A3110';
+  // Texture accent varies by style for extra variety
+  if (theme.styleIdx === 0) {
+    // Brick courses
+    ctx.fillStyle = theme.wallDark;
     for (let my = 4; my < S; my += 4) {
       ctx.fillRect(x, y + my, S, 1);
     }
     const vx = ((row % 2) * (S / 2) + S / 2) % S;
     ctx.fillRect(x + vx, y, 1, S);
-  } else if (floorMod === 1) {
-    // Floor 2: Teal/turquoise modern
-    ctx.fillStyle = '#1F5A54';
-    ctx.fillRect(x, y, S, S);
-    ctx.fillStyle = '#2D8A7D';
-    ctx.fillRect(x, y, S, 2);
-    ctx.fillRect(x, y, 2, S);
-    ctx.fillStyle = '#0F3A34';
-    ctx.fillRect(x, y + S - 2, S, 2);
-    ctx.fillRect(x + S - 2, y, 2, S);
+  } else if (theme.styleIdx === 1) {
     // Decorative grid
     ctx.fillStyle = 'rgba(255,255,255,0.08)';
     ctx.fillRect(x + S / 2 - 1, y, 2, S);
     ctx.fillRect(x, y + S / 2 - 1, S, 2);
-  } else if (floorMod === 2) {
-    // Floor 3: Light blue panels
-    ctx.fillStyle = '#4A8BC2';
-    ctx.fillRect(x, y, S, S);
-    ctx.fillStyle = '#5DA5D4';
-    ctx.fillRect(x, y, S, 2);
-    ctx.fillRect(x, y, 2, S);
-    ctx.fillStyle = '#3A6BA2';
-    ctx.fillRect(x, y + S - 2, S, 2);
-    ctx.fillRect(x + S - 2, y, 2, S);
-    // Panel lines
-    ctx.strokeStyle = '#2A5B92';
+  } else if (theme.styleIdx === 2) {
+    // Inset panel
+    ctx.strokeStyle = theme.wallDark;
     ctx.lineWidth = 0.5;
     ctx.strokeRect(x + 2, y + 2, S - 4, S - 4);
   } else {
-    // Floor 4: Purple ornate
-    ctx.fillStyle = '#7A4F8C';
-    ctx.fillRect(x, y, S, S);
-    ctx.fillStyle = '#9B6DB4';
-    ctx.fillRect(x, y, S, 2);
-    ctx.fillRect(x, y, 2, S);
-    ctx.fillStyle = '#5A3F6C';
-    ctx.fillRect(x, y + S - 2, S, 2);
-    ctx.fillRect(x + S - 2, y, 2, S);
     // Ornate corners
-    ctx.fillStyle = '#D4A5E8';
+    ctx.fillStyle = theme.wallAccent;
     ctx.fillRect(x + 2, y + 2, 2, 2);
     ctx.fillRect(x + S - 4, y + 2, 2, 2);
     ctx.fillRect(x + 2, y + S - 4, 2, 2);
@@ -310,27 +275,9 @@ function _drawWall(ctx, x, y, S, row, floorNum = 1) {
   }
 }
 
-function _drawFloor(ctx, x, y, S, row, col, offset, floorNum = 1) {
+function _drawFloor(ctx, x, y, S, row, col, offset, theme) {
   const light = (row + col + offset) % 2 === 0;
-
-  // Choose floor colors based on floor number
-  let lightColor, darkColor;
-  const floorMod = (floorNum - 1) % 4;
-  if (floorMod === 0) {
-    lightColor = P.FLOOR_1_LT;
-    darkColor = P.FLOOR_1_DK;
-  } else if (floorMod === 1) {
-    lightColor = P.FLOOR_2_LT;
-    darkColor = P.FLOOR_2_DK;
-  } else if (floorMod === 2) {
-    lightColor = P.FLOOR_3_LT;
-    darkColor = P.FLOOR_3_DK;
-  } else {
-    lightColor = P.FLOOR_4_LT;
-    darkColor = P.FLOOR_4_DK;
-  }
-
-  ctx.fillStyle = light ? lightColor : darkColor;
+  ctx.fillStyle = light ? theme.floorLight : theme.floorDark;
   ctx.fillRect(x, y, S, S);
   // Subtle grout lines
   ctx.fillStyle = 'rgba(0,0,0,0.08)';
@@ -340,9 +287,7 @@ function _drawFloor(ctx, x, y, S, row, col, offset, floorNum = 1) {
 
 function _drawDoor(ctx, x, y, S, d, floorNum = 1) {
   // Full square with answer number
-  const floorMod = (floorNum - 1) % 4;
-  const doorColors = ['#4A2410', '#1F5A54', '#3A6BA2', '#5A3F6C'];
-  ctx.fillStyle = doorColors[floorMod];
+  ctx.fillStyle = getFloorTheme(floorNum).door;
   ctx.fillRect(x, y, S, S);
 
   ctx.strokeStyle = P.GOLD;
@@ -432,9 +377,7 @@ export function drawSumBanner(ctx, junction, sum, maze, floorNum = 1) {
   ctx.fill();
 
   // Badge background — per floor theme
-  const floorMod = (floorNum - 1) % 4;
-  const sumColors = ['#4A2410', '#1F5A54', '#3A6BA2', '#5A3F6C'];
-  ctx.fillStyle = sumColors[floorMod];
+  ctx.fillStyle = getFloorTheme(floorNum).badge;
   _roundRect(ctx, cx - bw / 2, cy - bh / 2, bw, bh, 4);
   ctx.fill();
 
@@ -592,7 +535,7 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
 
   // Floor badge (hotel room number plate style)
   if (showFloor) {
-    const floorText = `${t('floor')} ${state.currentFloor}`;
+    const floorText = `${t('floor')} ${state.currentFloor}/${MAX_FLOOR}`;
     const floorFontSize = 9 + Math.min(state.currentFloor - 1, 4) * 0.6;
     ctx.font = `bold ${floorFontSize}px monospace`;
     const fw = ctx.measureText(floorText).width + 10;
