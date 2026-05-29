@@ -11,6 +11,14 @@ export function getInput() {
   return null;
 }
 
+let prevDir = null;
+export function getInputJustPressed() {
+  const dir = getInput();
+  const fired = dir !== null && dir !== prevDir;
+  prevDir = dir;
+  return fired ? dir : null;
+}
+
 export function isSpaceJustPressed() {
   const v = keys['Space'];
   return !!v;

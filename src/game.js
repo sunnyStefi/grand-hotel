@@ -1,6 +1,6 @@
 import { createFloor, WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, CELL_SIZE, COLS, ROWS } from './maze.js';
 import { generateSum, generateDecoys, updateTier, TIER_10 } from './math-engine.js';
-import { getInput, consumeSpacePress, consumeEnterPress, consumeNavUp, consumeNavDown } from './input.js';
+import { getInput, getInputJustPressed, consumeSpacePress, consumeEnterPress, consumeNavUp, consumeNavDown } from './input.js';
 import { initAudio, playSfx, speakSum, setMuted, isMuted } from './audio.js';
 import { saveState, loadState } from './storage.js';
 import {
@@ -36,7 +36,7 @@ function defaultState() {
     maze: null,
     bellhop: { x: 1, y: 1 },
     moveTimer: 0,
-    MOVE_INTERVAL: 200,  // ms per cell
+    MOVE_INTERVAL: 100,  // ms per cell (held repeat)
 
     // Math
     activeJunction: null,   // { row, col }
@@ -376,13 +376,15 @@ function update(dt) {
   // Particles
   updateParticles(state.particles, dt);
 
-  // Movement
+  // Movement — instant on first press, then repeat at MOVE_INTERVAL
+  const justPressed = getInputJustPressed();
+  if (justPressed) state.moveTimer = state.MOVE_INTERVAL; // trigger immediate step
   state.moveTimer += dt;
   if (state.moveTimer >= state.MOVE_INTERVAL) {
     state.moveTimer -= state.MOVE_INTERVAL;
     const dir = getInput();
     if (dir && !state.activeJunction) tryMove(dir);
-    else if (dir && state.doorOverlays) tryMove(dir); // allow door selection while junction active
+    else if (dir && state.doorOverlays) tryMove(dir);
   }
 }
 
