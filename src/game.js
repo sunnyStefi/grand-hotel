@@ -83,6 +83,9 @@ function defaultState() {
     // UI
     paused: false,
     clearAnimTimer: 0,
+
+    // Floor states (for preserving resolved doors when going back down)
+    floorStates: {},
   };
 }
 
@@ -106,16 +109,34 @@ if (saved) {
 }
 
 // ─── Floor init ───────────────────────────────────────────────────────────────
+function saveFloorState(floorNum) {
+  if (state.maze) {
+    state.floorStates[floorNum] = {
+      maze: state.maze.map(row => [...row]),
+      resolvedJunctions: state.resolvedJunctions,
+    };
+  }
+}
+
 function loadFloor(floorNum) {
-  state.maze = createFloor(floorNum);
+  // Check if we have a saved state for this floor
+  const savedFloor = state.floorStates[floorNum];
+  if (savedFloor) {
+    state.maze = savedFloor.maze.map(row => [...row]);
+    state.resolvedJunctions = savedFloor.resolvedJunctions;
+  } else {
+    state.maze = createFloor(floorNum);
+    state.resolvedJunctions = 0;
+  }
+
   state.bellhop = { x: 1, y: 1 };
   state.activeJunction = null;
   state.doorOverlays = null;
   state.currentSum = null;
-  state.resolvedJunctions = 0;
   state.liftBlocked = false;
   state.particles = [];
   state.streak = 0;
+
   // Count junctions
   state.totalJunctions = 0;
   for (let r = 0; r < ROWS; r++)
@@ -234,6 +255,11 @@ function tryMove(dir) {
         state.activeJunction = null;
         state.currentSum = null;
         state.resolvedJunctions++;
+        // Save floor state for down elevator
+        state.floorStates[state.currentFloor] = {
+          maze: state.maze.map(row => [...row]),
+          resolvedJunctions: state.resolvedJunctions,
+        };
         // Tier update
         if (state.recentAnswers.length % 5 === 0) {
           state.tier = updateTier(state.tier, state.recentAnswers);
@@ -297,6 +323,7 @@ function tryMove(dir) {
       state.downLiftMessage = true;
       state.downLiftMessageTimer = 1500;
     } else {
+      saveFloorState(state.currentFloor);
       state.currentFloor--;
       loadFloor(state.currentFloor);
       playSfx('ding');
@@ -327,6 +354,7 @@ function activateBuildSelection() {
 
   if (idx === items.length) {
     // Next floor
+    saveFloorState(state.currentFloor);
     state.currentFloor++;
     loadFloor(state.currentFloor);
     state.ui = 'game';

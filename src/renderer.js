@@ -169,11 +169,11 @@ export function drawMaze(ctx, maze, doorOverlays, floorNum = 1) {
         ctx.fillRect(x, y, S, S);
         ctx.fillStyle = '#4A90D9';
         ctx.fillRect(x + 2, y + 2, S - 4, S - 4);
-        ctx.fillStyle = P.NAVY;
-        ctx.font = 'bold 6px monospace';
+        ctx.fillStyle = P.CREAM;
+        ctx.font = 'bold 7px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('DOWN', x + S / 2, y + S / 2);
+        ctx.fillText('DN', x + S / 2, y + S / 2);
       }
     }
   }
