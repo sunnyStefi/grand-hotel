@@ -237,7 +237,7 @@ export function drawMaze(ctx, maze, doorOverlays, floorNum = 1) {
     doorOverlays.forEach(d => {
       const x = d.col * CELL_SIZE;
       const y = d.row * CELL_SIZE;
-      _drawDoor(ctx, x, y, CELL_SIZE, d);
+      _drawDoor(ctx, x, y, CELL_SIZE, d, floorNum);
     });
   }
 }
@@ -337,7 +337,7 @@ function _drawFloor(ctx, x, y, S, row, col, offset, floorNum = 1) {
   ctx.fillRect(x, y, 1, S);
 }
 
-function _drawDoor(ctx, x, y, S, d) {
+function _drawDoor(ctx, x, y, S, d, floorNum = 1) {
   // Wood base
   ctx.fillStyle = P.WOOD_DARK;
   ctx.fillRect(x, y, S, S);
@@ -371,7 +371,11 @@ function _drawDoor(ctx, x, y, S, d) {
     ctx.globalAlpha = 1;
   }
 
-  // Answer value badge — always inside the door cell, vertically centered
+  // Answer value badge — color per floor theme
+  const floorMod = (floorNum - 1) % 4;
+  const badgeColors = ['#4A2410', '#1F5A54', '#3A6BA2', '#5A3F6C'];
+  const badgeColor = badgeColors[floorMod];
+
   const text = String(d.value);
   ctx.font = 'bold 9px monospace';
   const tw = ctx.measureText(text).width;
@@ -379,7 +383,7 @@ function _drawDoor(ctx, x, y, S, d) {
   const bh = 11;
   const bx = x + S / 2 - bw / 2;
   const by = y + (S - bh) / 2;
-  ctx.fillStyle = P.NAVY;
+  ctx.fillStyle = badgeColor;
   _roundRect(ctx, bx, by, bw, bh, 2);
   ctx.fill();
   ctx.strokeStyle = P.GOLD_LT;
@@ -417,7 +421,7 @@ export function drawBellhop(ctx, bx, by, dir = 'down', walkFrame = 0, floorNum =
 }
 
 // ─── Sum banner ───────────────────────────────────────────────────────────────
-export function drawSumBanner(ctx, junction, sum, maze) {
+export function drawSumBanner(ctx, junction, sum, maze, floorNum = 1) {
   if (!junction || !sum) return;
   const cx = junction.col * CELL_SIZE + CELL_SIZE / 2;
 
@@ -440,8 +444,10 @@ export function drawSumBanner(ctx, junction, sum, maze) {
   _roundRect(ctx, cx - bw / 2 + 1, cy - bh / 2 + 2, bw, bh, 4);
   ctx.fill();
 
-  // Badge background
-  ctx.fillStyle = P.NAVY;
+  // Badge background — per floor theme
+  const floorMod = (floorNum - 1) % 4;
+  const sumColors = ['#4A2410', '#1F5A54', '#3A6BA2', '#5A3F6C'];
+  ctx.fillStyle = sumColors[floorMod];
   _roundRect(ctx, cx - bw / 2, cy - bh / 2, bw, bh, 4);
   ctx.fill();
 
