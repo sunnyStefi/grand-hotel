@@ -7,6 +7,7 @@ export function saveState(state) {
     highestFloor: state.currentFloor,
     difficulty: { tier: state.tier, recentAnswers: state.recentAnswers },
     stats: state.stats,
+    language: state.language,
   };
   try {
     localStorage.setItem(KEY, JSON.stringify(data));

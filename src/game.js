@@ -3,14 +3,25 @@ import { generateProblem, generateDecoys, updateTier, TIER_1, TIER_2, TIER_3 } f
 import { getInput, getInputJustPressed, consumeSpacePress, consumeEnterPress, consumeEnterOnly, consumeNavUp, consumeNavDown } from './input.js';
 import { initAudio, playSfx, setMuted, isMuted } from './audio.js';
 import { saveState, loadState, clearState } from './storage.js';
+import { t, setLanguage, nextLanguage, langName, detectLanguage } from './i18n.js';
 import {
   initRenderer, drawMaze, drawBellhop, drawSumBanner, drawHUD, drawPauseOverlay,
   drawBuildScreen, updateParticles, spawnCoins, spawnLightRays, spawnMoneyRemoval, drawParticles,
   drawVignetteOverlay, getBuildItems, PAUSE_MENU_Y0, PAUSE_MENU_STEP,
 } from './renderer.js';
 
-// Pause menu items (order shown top-to-bottom)
-const PAUSE_ITEMS = ['Resume', 'Save game', 'Reload last save', 'New game'];
+// Pause menu item IDs (order shown top-to-bottom); labels are localized at render time
+const PAUSE_ITEMS = ['resume', 'save', 'reload', 'language', 'newGame'];
+
+// Build localized labels for the pause menu (Language shows the current choice;
+// Save flashes a confirmation for a moment after saving).
+function pauseLabels() {
+  return PAUSE_ITEMS.map(id => {
+    if (id === 'language') return `${t('language')}: ${langName()}`;
+    if (id === 'save' && state.savedFlashTimer > 0) return `${t('save')}   ${t('saved')}`;
+    return t(id);
+  });
+}
 
 // ─── Canvas setup ────────────────────────────────────────────────────────────
 const canvas = document.getElementById('game');
@@ -76,6 +87,9 @@ function defaultState() {
     // Difficulty
     tier: TIER_1,
 
+    // Language (ISO code: en/it/es/nl)
+    language: 'en',
+
     // Hotel
     hotel: { rooms: 0, floors: 1, stars: 1 },
 
@@ -131,7 +145,11 @@ if (saved) {
     state.recentAnswers = saved.difficulty.recentAnswers || [];
   }
   state.stats = saved.stats || state.stats;
+  state.language = saved.language || detectLanguage();
+} else {
+  state.language = detectLanguage();
 }
+setLanguage(state.language);
 
 // ─── Floor init ───────────────────────────────────────────────────────────────
 function saveFloorState(floorNum) {
@@ -392,19 +410,22 @@ function showBuildScreen() {
 
 function activatePauseSelection() {
   const choice = PAUSE_ITEMS[state.pauseSelectedIdx];
-  if (choice === 'Resume') {
+  if (choice === 'resume') {
     state.paused = false;
     state.ui = 'game';
-  } else if (choice === 'Save game') {
+  } else if (choice === 'save') {
     saveState(state);
     state.savedFlashTimer = 1500;
     playSfx('ding');
-  } else if (choice === 'Reload last save') {
-    if (window.confirm('Reload your last saved game? Anything since your last save will be lost.')) {
+  } else if (choice === 'language') {
+    state.language = nextLanguage();
+    saveState(state);   // remember the choice immediately
+  } else if (choice === 'reload') {
+    if (window.confirm(t('confirmReload'))) {
       window.location.reload();
     }
-  } else if (choice === 'New game') {
-    if (window.confirm('Start a new game? This erases your hotel, coins and progress.')) {
+  } else if (choice === 'newGame') {
+    if (window.confirm(t('confirmNew'))) {
       clearState();
       window.location.reload();
     }
@@ -601,7 +622,7 @@ function render() {
     ctx.font = '8px monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Open all doors first!', LW / 2, LH / 2);
+    ctx.fillText(t('openDoors'), LW / 2, LH / 2);
   }
 
   // Down lift message
@@ -612,7 +633,7 @@ function render() {
     ctx.font = '8px monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Ground floor!', LW / 2, LH / 2);
+    ctx.fillText(t('groundFloor'), LW / 2, LH / 2);
   }
 
   // Floor clear overlay
@@ -623,18 +644,18 @@ function render() {
     ctx.font = 'bold 14px monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('FLOOR CLEAR!', LW / 2, LH / 2 - 10);
+    ctx.fillText(t('floorClear'), LW / 2, LH / 2 - 10);
     ctx.fillStyle = '#fff8e7';
     ctx.font = '9px monospace';
-    ctx.fillText(`Bank: $${Math.floor(state.money)}`, LW / 2, LH / 2 + 6);
+    ctx.fillText(`${t('bank')}: $${Math.floor(state.money)}`, LW / 2, LH / 2 + 6);
   }
 
-  if (state.ui === 'pause') drawPauseOverlay(ctx, LW, LH, PAUSE_ITEMS, state.pauseSelectedIdx, state.savedFlashTimer);
+  if (state.ui === 'pause') drawPauseOverlay(ctx, LW, LH, pauseLabels(), state.pauseSelectedIdx);
 
   // Title splash
   if (state.titleSplashTimer > 0) {
-    const t = Math.min(1, state.titleSplashTimer / 800);
-    ctx.globalAlpha = t;
+    const alpha = Math.min(1, state.titleSplashTimer / 800);
+    ctx.globalAlpha = alpha;
     ctx.fillStyle = 'rgba(0,0,0,0.65)';
     ctx.fillRect(0, 0, LW, LH);
     ctx.fillStyle = '#f5c842';
@@ -644,7 +665,7 @@ function render() {
     ctx.fillText('GRAND HOTEL GOLD', LW / 2, LH / 2 - 8);
     ctx.fillStyle = '#fff8e7';
     ctx.font = '8px monospace';
-    ctx.fillText('a math maze adventure', LW / 2, LH / 2 + 8);
+    ctx.fillText(t('splashSubtitle'), LW / 2, LH / 2 + 8);
     ctx.globalAlpha = 1;
   }
 

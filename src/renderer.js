@@ -1,6 +1,7 @@
 import { WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, DOWN_LIFT, CELL_SIZE } from './maze.js';
 import { isMuted } from './audio.js';
 import { PALETTE, drawSprite, BELLHOP_SPRITES, getBellhopSprites } from './sprites.js';
+import { t } from './i18n.js';
 
 const P = PALETTE;
 
@@ -591,7 +592,7 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
 
   // Floor badge (hotel room number plate style)
   if (showFloor) {
-    const floorText = `FLOOR ${state.currentFloor}`;
+    const floorText = `${t('floor')} ${state.currentFloor}`;
     const floorFontSize = 9 + Math.min(state.currentFloor - 1, 4) * 0.6;
     ctx.font = `bold ${floorFontSize}px monospace`;
     const fw = ctx.measureText(floorText).width + 10;
@@ -657,7 +658,7 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
 export const PAUSE_MENU_Y0 = 56;
 export const PAUSE_MENU_STEP = 16;
 
-export function drawPauseOverlay(ctx, W, H, items = [], selectedIdx = 0, savedFlash = 0) {
+export function drawPauseOverlay(ctx, W, H, items = [], selectedIdx = 0) {
   ctx.fillStyle = 'rgba(0,0,0,0.72)';
   ctx.fillRect(0, 0, W, H);
 
@@ -665,21 +666,19 @@ export function drawPauseOverlay(ctx, W, H, items = [], selectedIdx = 0, savedFl
   ctx.font = 'bold 14px monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('PAUSED', W / 2, 28);
+  ctx.fillText(t('paused'), W / 2, 28);
 
   items.forEach((label, i) => {
     const iy = PAUSE_MENU_Y0 + i * PAUSE_MENU_STEP;
     const selected = i === selectedIdx;
     ctx.fillStyle = selected ? P.GOLD : P.CREAM;
     ctx.font = selected ? 'bold 9px monospace' : '9px monospace';
-    let text = (selected ? '▶ ' : '  ') + label;
-    if (label === 'Save game' && savedFlash > 0) text += '   ✓ Saved';
-    ctx.fillText(text, W / 2, iy);
+    ctx.fillText((selected ? '▶ ' : '  ') + label, W / 2, iy);
   });
 
   ctx.fillStyle = P.WALL_LT;
   ctx.font = '7px monospace';
-  ctx.fillText('↑↓ select   ENTER pick   SPACE resume', W / 2, H - 8);
+  ctx.fillText(t('pauseHint'), W / 2, H - 8);
 }
 
 export function drawBuildScreen(ctx, state, selectedIdx, W, H) {
@@ -702,7 +701,7 @@ export function drawBuildScreen(ctx, state, selectedIdx, W, H) {
   ctx.fillStyle = P.CREAM;
   const bankFontSize = 9 + Math.min(state.currentFloor - 1, 4) * 0.5;
   ctx.font = `${bankFontSize}px monospace`;
-  ctx.fillText(`Bank: $${Math.floor(state.money)}`, W / 2, 42);
+  ctx.fillText(`${t('bank')}: $${Math.floor(state.money)}`, W / 2, 42);
 
   const items = _buildItems(state);
   items.forEach((item, i) => {
@@ -713,7 +712,7 @@ export function drawBuildScreen(ctx, state, selectedIdx, W, H) {
     const itemFontSize = 8 + Math.min(state.currentFloor - 1, 4) * 0.4;
     ctx.font = selected ? `bold ${itemFontSize}px monospace` : `${itemFontSize}px monospace`;
     const prefix = selected ? '▶ ' : '  ';
-    const suffix = item.locked ? ' (locked)' : item.canAfford ? '' : ` ($${item.cost})`;
+    const suffix = item.locked ? ` ${t('locked')}` : item.canAfford ? '' : ` ($${item.cost})`;
     ctx.fillText(`${prefix}${item.label}${suffix}`, 8, iy);
   });
 
@@ -722,11 +721,11 @@ export function drawBuildScreen(ctx, state, selectedIdx, W, H) {
   const nextFloorFontSize = 9 + Math.min(state.currentFloor - 1, 4) * 0.5;
   ctx.font = selectedIdx === items.length ? `bold ${nextFloorFontSize}px monospace` : `${nextFloorFontSize}px monospace`;
   ctx.textAlign = 'center';
-  ctx.fillText(selectedIdx === items.length ? '▶ NEXT FLOOR ◀' : 'NEXT FLOOR  (↓)', W / 2, ny);
+  ctx.fillText(selectedIdx === items.length ? `▶ ${t('nextFloor')} ◀` : `${t('nextFloor')}  (↓)`, W / 2, ny);
 
   ctx.fillStyle = P.WALL_LT;
   ctx.font = '7px monospace';
-  ctx.fillText('↑↓ navigate   SPACE/ENTER select', W / 2, H - 4);
+  ctx.fillText(t('buildHint'), W / 2, H - 4);
 }
 
 function _buildItems(state) {
@@ -737,12 +736,12 @@ function _buildItems(state) {
   const roomCosts = [200, 300, 350];
   for (let i = 0; i < 3; i++) {
     if (rooms <= i) {
-      items.push({ label: `Room ${i + 1}`, cost: roomCosts[i], locked: rooms < i, canAfford: money >= roomCosts[i], action: 'room', idx: i });
+      items.push({ label: `${t('room')} ${i + 1}`, cost: roomCosts[i], locked: rooms < i, canAfford: money >= roomCosts[i], action: 'room', idx: i });
       break;
     }
   }
   if (rooms >= 3) {
-    items.push({ label: `Floor ${floors + 1}`, cost: 1000, locked: false, canAfford: money >= 1000, action: 'floor' });
+    items.push({ label: `${t('buildFloor')} ${floors + 1}`, cost: 1000, locked: false, canAfford: money >= 1000, action: 'floor' });
   }
   return items;
 }
