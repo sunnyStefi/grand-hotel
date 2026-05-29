@@ -1,4 +1,4 @@
-import { createFloor, WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, CELL_SIZE, COLS, ROWS } from './maze.js';
+import { createFloor, WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, DOWN_LIFT, CELL_SIZE, COLS, ROWS } from './maze.js';
 import { generateSum, generateDecoys, updateTier, TIER_10 } from './math-engine.js';
 import { getInput, getInputJustPressed, consumeSpacePress, consumeEnterPress, consumeNavUp, consumeNavDown } from './input.js';
 import { initAudio, playSfx, speakSum, setMuted, isMuted } from './audio.js';
@@ -59,11 +59,11 @@ function defaultState() {
     streak: 0,
     particles: [],
 
-    // Floor progress
-    totalJunctions: 0,
-    resolvedJunctions: 0,
+    // Lift
     liftBlocked: false,
     liftBlockTimer: 0,
+    downLiftMessage: false,
+    downLiftMessageTimer: 0,
 
     // Difficulty
     tier: TIER_10,
@@ -292,6 +292,18 @@ function tryMove(dir) {
     return;
   }
 
+  if (cell === DOWN_LIFT) {
+    if (state.currentFloor <= 1) {
+      state.downLiftMessage = true;
+      state.downLiftMessageTimer = 1500;
+    } else {
+      state.currentFloor--;
+      loadFloor(state.currentFloor);
+      playSfx('ding');
+    }
+    return;
+  }
+
   state.bellhop.x = nx;
   state.bellhop.y = ny;
 }
@@ -385,6 +397,10 @@ function update(dt) {
   if (state.liftBlockTimer > 0) state.liftBlockTimer -= dt;
   else state.liftBlocked = false;
 
+  // Down lift message
+  if (state.downLiftMessageTimer > 0) state.downLiftMessageTimer -= dt;
+  else state.downLiftMessage = false;
+
   // Money display animation
   if (state.moneyAnimTimer < 400) {
     state.moneyAnimTimer += dt;
@@ -461,6 +477,17 @@ function render() {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('Open all doors first!', LW / 2, LH / 2);
+  }
+
+  // Down lift message
+  if (state.downLiftMessage && state.downLiftMessageTimer > 0) {
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(LW / 2 - 70, LH / 2 - 8, 140, 16);
+    ctx.fillStyle = '#4A90D9';
+    ctx.font = '8px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Ground floor!', LW / 2, LH / 2);
   }
 
   // Floor clear overlay

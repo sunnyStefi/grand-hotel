@@ -1,4 +1,4 @@
-import { WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, CELL_SIZE } from './maze.js';
+import { WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, DOWN_LIFT, CELL_SIZE } from './maze.js';
 import { isMuted } from './audio.js';
 import { PALETTE, drawSprite, BELLHOP_SPRITES, getCatSpritesForFloor } from './sprites.js';
 
@@ -164,6 +164,16 @@ export function drawMaze(ctx, maze, doorOverlays, floorNum = 1) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('UP', x + S / 2, y + S / 2);
+      } else if (cell === DOWN_LIFT) {
+        ctx.fillStyle = P.WALL_MID;
+        ctx.fillRect(x, y, S, S);
+        ctx.fillStyle = '#4A90D9';
+        ctx.fillRect(x + 2, y + 2, S - 4, S - 4);
+        ctx.fillStyle = P.NAVY;
+        ctx.font = 'bold 6px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('DOWN', x + S / 2, y + S / 2);
       }
     }
   }

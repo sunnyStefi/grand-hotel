@@ -3,9 +3,10 @@ export const FLOOR = 1;
 export const DOOR_JUNCTION = 2;
 export const STASH = 3;
 export const LIFT = 4;
+export const DOWN_LIFT = 5;
 
-// W=WALL, F=FLOOR, D=DOOR_JUNCTION, S=STASH, L=LIFT
-const W = WALL, F = FLOOR, D = DOOR_JUNCTION, S = STASH, L = LIFT;
+// W=WALL, F=FLOOR, D=DOOR_JUNCTION, S=STASH, L=LIFT, V=DOWN_LIFT
+const W = WALL, F = FLOOR, D = DOOR_JUNCTION, S = STASH, L = LIFT, V = DOWN_LIFT;
 
 const TEMPLATES = [
   // Floor 1 — 20 cols × 11 rows, start at (1,1)
@@ -33,7 +34,7 @@ const TEMPLATES = [
     [W,F,W,W,W,D,W,W,F,W,W,W,W,D,W,W,F,W,W,W],
     [W,F,F,F,W,F,F,W,F,F,F,W,F,F,F,W,F,F,F,W],
     [W,W,W,F,W,F,W,W,W,W,F,W,F,W,W,W,W,W,F,W],
-    [W,S,F,F,F,F,F,F,F,F,F,F,F,W,F,F,F,F,L,W],
+    [W,V,F,F,F,F,F,F,F,F,F,F,F,W,F,F,F,F,L,W],
     [W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W],
   ],
   // Floor 3
@@ -47,7 +48,7 @@ const TEMPLATES = [
     [W,W,W,D,W,W,F,W,W,F,W,W,W,D,W,W,F,W,W,W],
     [W,F,F,F,W,F,F,W,F,F,F,W,F,F,F,W,F,S,F,W],
     [W,F,W,W,W,F,W,W,W,W,F,W,F,W,W,W,W,W,F,W],
-    [W,F,F,F,F,F,F,F,F,F,F,F,F,W,F,F,F,F,L,W],
+    [W,V,F,F,F,F,F,F,F,F,F,F,F,W,F,F,F,F,L,W],
     [W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W],
   ],
 ];
