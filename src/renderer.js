@@ -359,9 +359,7 @@ export function drawBellhop(ctx, bx, by, dir = 'down', walkFrame = 0, floorNum =
   const catSprites = getCatSpritesForFloor(floorNum);
   const frames = catSprites[dir] || catSprites.down;
   const frame = frames[walkFrame % frames.length];
-  // Center 8-wide sprite in CELL_SIZE cell
-  const ox = Math.floor((CELL_SIZE - 8) / 2);
-  drawSprite(ctx, frame, px + ox, py);
+  drawSprite(ctx, frame, px, py, 1);
 }
 
 // ─── Sum banner ───────────────────────────────────────────────────────────────
