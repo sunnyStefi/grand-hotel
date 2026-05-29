@@ -338,56 +338,22 @@ function _drawFloor(ctx, x, y, S, row, col, offset, floorNum = 1) {
 }
 
 function _drawDoor(ctx, x, y, S, d, floorNum = 1) {
-  // Cream door frame (extends to cell edges)
-  ctx.fillStyle = '#E8DCC0';
+  // Full square with answer number
+  const floorMod = (floorNum - 1) % 4;
+  const doorColors = ['#4A2410', '#1F5A54', '#3A6BA2', '#5A3F6C'];
+  ctx.fillStyle = doorColors[floorMod];
   ctx.fillRect(x, y, S, S);
 
-  // Door body (dark wood, inset from frame)
-  ctx.fillStyle = P.WOOD_DARK;
-  ctx.fillRect(x + 1, y + 1, S - 2, S - 2);
-
-  // Decorative top arch
-  ctx.fillStyle = P.WOOD_MID;
-  ctx.fillRect(x + 3, y + 2, S - 6, 2);
-
-  // Gold frame border
   ctx.strokeStyle = P.GOLD;
   ctx.lineWidth = 1.5;
   ctx.strokeRect(x + 1, y + 1, S - 2, S - 2);
 
-  // Answer value badge — upper portion of door
-  const floorMod = (floorNum - 1) % 4;
-  const badgeColors = ['#4A2410', '#1F5A54', '#3A6BA2', '#5A3F6C'];
-  const badgeColor = badgeColors[floorMod];
-
   const text = String(d.value);
-  ctx.font = 'bold 9px monospace';
-  const tw = ctx.measureText(text).width;
-  const bw = tw + 6;
-  const bh = 9;
-  const bx = x + S / 2 - bw / 2;
-  const by = y + 2;
-  ctx.fillStyle = badgeColor;
-  _roundRect(ctx, bx, by, bw, bh, 2);
-  ctx.fill();
-  ctx.strokeStyle = P.GOLD_LT;
-  ctx.lineWidth = 1;
-  _roundRect(ctx, bx, by, bw, bh, 2);
-  ctx.stroke();
-  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 10px monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, x + S / 2, by + bh / 2);
-
-  // Door handle — horizontal pull bar below the badge
-  ctx.fillStyle = P.WOOD_LT;
-  ctx.fillRect(x + S / 2 - 4, y + 12, 8, 3);
-  ctx.fillStyle = P.GOLD;
-  ctx.fillRect(x + S / 2 - 4, y + 12, 8, 2);
-  ctx.fillStyle = P.GOLD_LT;
-  ctx.fillRect(x + S / 2 - 3, y + 13, 6, 1);
-  ctx.fillStyle = '#FFE88C';
-  ctx.fillRect(x + S / 2 - 2, y + 13, 2, 1);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText(text, x + S / 2, y + S / 2);
 
   // Wrong answer flash: red X
   if (d.flash > 0) {
@@ -590,7 +556,7 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
   const inflText2 = state.inflationEnabled !== false ? 'INFL ON' : 'INFL OFF';
   ctx.font = '7px monospace';
   const inflW2 = ctx.measureText(inflText2).width + 8;
-  const muteText2 = isMuted() ? '[M]OFF' : '[M]ON';
+  const muteText2 = isMuted() ? '[M]ON' : '[M]OFF';
   const muteW2 = ctx.measureText(muteText2).width + 8;
   const inflX2 = W - muteW2 - 4 - inflW2;
   ctx.fillStyle = state.inflationEnabled !== false ? P.BURGUNDY : P.WALL_MID;
@@ -620,22 +586,24 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
     ctx.fillStyle = '#FFFFFF';
     ctx.textAlign = 'center';
     ctx.fillText(floorText, W / 2, 8);
-    // Subtitle
-    ctx.fillStyle = 'rgba(245,200,66,0.6)';
-    ctx.font = '5px monospace';
-    ctx.fillText('GRAND HOTEL GOLD', W / 2, 16);
   }
+
+  // Title watermark
+  ctx.fillStyle = 'rgba(245,200,66,0.5)';
+  ctx.font = '5px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText('GRAND HOTEL GOLD', W - muteW2 - inflW2 - 8, 8);
 
   // Mute badge
   ctx.font = '7px monospace';
-  ctx.fillStyle = P.NAVY;
+  ctx.fillStyle = isMuted() ? P.BURGUNDY : P.NAVY;
   _roundRect(ctx, W - muteW2 - 2, 2, muteW2, 12, 2);
   ctx.fill();
-  ctx.strokeStyle = P.WALL_MID;
+  ctx.strokeStyle = isMuted() ? P.RED : P.WALL_MID;
   ctx.lineWidth = 1;
   _roundRect(ctx, W - muteW2 - 2, 2, muteW2, 12, 2);
   ctx.stroke();
-  ctx.fillStyle = P.CREAM_DK;
+  ctx.fillStyle = isMuted() ? '#FFFFFF' : P.CREAM_DK;
   ctx.textAlign = 'right';
   ctx.fillText(muteText2, W - 6, 8);
 
