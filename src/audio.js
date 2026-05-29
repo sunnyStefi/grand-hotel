@@ -69,40 +69,17 @@ export function initAudio() {
   buffers.cashout = makeCashout();
   buffers.sad     = makeSad();
 
-  // Music — generated chiptune loop
-  startMusic(ac);
+  // Music — load MP3 background loop
+  startMusic();
 }
 
-function startMusic(ac) {
-  // Simple procedural chiptune loop using oscillators
-  const notes = [523, 659, 784, 659, 523, 392, 440, 523];
-  const beatLen = 0.18;
-  musicEl = { playing: true };
-
-  function scheduleBeat(startTime, noteIdx) {
-    if (!musicEl.playing || muted) {
-      setTimeout(() => !muted && scheduleBeat(ac.currentTime, 0), 200);
-      return;
-    }
-    const freq = notes[noteIdx % notes.length];
-    const osc = ac.createOscillator();
-    const gain = ac.createGain();
-    osc.type = 'square';
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.06, startTime);
-    gain.gain.linearRampToValueAtTime(0, startTime + beatLen * 0.8);
-    osc.connect(gain);
-    gain.connect(ac.destination);
-    osc.start(startTime);
-    osc.stop(startTime + beatLen);
-
-    const delay = (startTime - ac.currentTime + beatLen) * 1000;
-    setTimeout(() => {
-      if (musicEl.playing) scheduleBeat(ac.currentTime, noteIdx + 1);
-    }, Math.max(0, delay - 10));
-  }
-
-  scheduleBeat(ac.currentTime, 0);
+function startMusic() {
+  if (musicEl) return;
+  const audio = new Audio('assets/audio/Grand Hotel Gold.mp3');
+  audio.loop = true;
+  audio.volume = 0.3;
+  audio.play().catch(() => {});
+  musicEl = audio;
 }
 
 export function playSfx(name) {
@@ -117,21 +94,10 @@ export function playSfx(name) {
   src.start();
 }
 
-export function speakSum(a, b) {
-  if (muted) return;
-  try {
-    if (!window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(`${a} plus ${b}`);
-    u.rate = 0.9;
-    speechSynthesis.speak(u);
-  } catch (_) {}
-}
-
 export function setMuted(m) {
   muted = m;
   if (sfxGain) sfxGain.gain.value = m ? 0 : 1;
-  try { if (m) speechSynthesis.cancel(); } catch (_) {}
+  if (musicEl) musicEl.volume = m ? 0 : 0.3;
 }
 
 export function isMuted() { return muted; }

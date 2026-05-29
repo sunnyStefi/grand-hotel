@@ -1,7 +1,7 @@
 import { createFloor, WALL, FLOOR, DOOR_JUNCTION, STASH, LIFT, DOWN_LIFT, CELL_SIZE, COLS, ROWS } from './maze.js';
 import { generateSum, generateDecoys, updateTier, TIER_10 } from './math-engine.js';
 import { getInput, getInputJustPressed, consumeSpacePress, consumeEnterPress, consumeNavUp, consumeNavDown } from './input.js';
-import { initAudio, playSfx, speakSum, setMuted, isMuted } from './audio.js';
+import { initAudio, playSfx, setMuted, isMuted } from './audio.js';
 import { saveState, loadState } from './storage.js';
 import {
   initRenderer, drawMaze, drawBellhop, drawSumBanner, drawHUD, drawPauseOverlay,
@@ -199,7 +199,7 @@ function activateJunction(row, col) {
   state.activeJunction = { row, col };
   state.junctionStartTime = performance.now();
   state.currentSum = generateSum(state.tier);
-  speakSum(state.currentSum.a, state.currentSum.b);
+
 
   // Place answer doors on adjacent FLOOR cells
   const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
