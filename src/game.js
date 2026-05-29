@@ -65,6 +65,11 @@ function defaultState() {
     downLiftMessage: false,
     downLiftMessageTimer: 0,
 
+    // Inflation (money drain over time)
+    inflationEnabled: true,
+    inflationTimer: 0,
+    INFLATION_INTERVAL: 2500,
+
     // Difficulty
     tier: TIER_10,
 
@@ -156,6 +161,7 @@ window.addEventListener('click',   ensureAudio, { once: true });
 
 // ─── Mute button region (canvas-relative, logical coords) ────────────────────
 const MUTE_X = LW - 40, MUTE_Y = 0, MUTE_W = 40, MUTE_H = 14;
+const INFL_X = LW - 90, INFL_Y = 0, INFL_W = 50, INFL_H = 14;
 canvas.addEventListener('click', e => {
   const rect = canvas.getBoundingClientRect();
   const scaleX = LW / rect.width;
@@ -164,6 +170,8 @@ canvas.addEventListener('click', e => {
   const ly = (e.clientY - rect.top)  * scaleY;
   if (lx >= MUTE_X && lx <= MUTE_X + MUTE_W && ly >= MUTE_Y && ly <= MUTE_Y + MUTE_H) {
     setMuted(!isMuted());
+  } else if (lx >= INFL_X && lx <= INFL_X + INFL_W && ly >= INFL_Y && ly <= INFL_Y + INFL_H) {
+    state.inflationEnabled = !state.inflationEnabled;
   }
   // Build screen item click
   if (state.ui === 'build') {
@@ -434,6 +442,21 @@ function update(dt) {
     state.moneyAnimTimer += dt;
     const t = Math.min(1, state.moneyAnimTimer / 400);
     state.displayMoney = state.moneyAnimStart + (state.moneyAnimTarget - state.moneyAnimStart) * t;
+  }
+
+  // Inflation drain
+  if (state.inflationEnabled && state.money > 0) {
+    state.inflationTimer += dt;
+    if (state.inflationTimer >= state.INFLATION_INTERVAL) {
+      state.inflationTimer -= state.INFLATION_INTERVAL;
+      state.money = Math.max(0, state.money - 1);
+      state.moneyAnimStart = state.displayMoney;
+      state.moneyAnimTarget = state.money;
+      state.moneyAnimTimer = 0;
+      spawnMoneyRemoval(state.particles, state.bellhop.x, state.bellhop.y, 1);
+    }
+  } else {
+    state.inflationTimer = 0;
   }
 
   // Particles

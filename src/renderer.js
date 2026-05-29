@@ -105,6 +105,61 @@ export function initRenderer(ctx) {
   buildWallpaperPatterns(ctx);
 }
 
+// ─── Coin rendering ──────────────────────────────────────────────────────────
+function _drawCoin(ctx, cx, cy, r, frame) {
+  // Animated gold coin: frame 0,2=face, 1=turning, 3=edge
+  if (frame === 3) {
+    ctx.fillStyle = P.GOLD;
+    ctx.fillRect(cx - r * 0.5, cy - 1, r, 2);
+    ctx.fillStyle = P.GOLD_LT;
+    ctx.fillRect(cx - r * 0.4, cy - 1, 2, 2);
+    ctx.fillStyle = '#8B6914';
+    ctx.fillRect(cx + r * 0.4 - 2, cy - 1, 2, 2);
+    return;
+  }
+
+  const squish = frame === 1 ? 0.55 : 1;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.beginPath();
+  ctx.ellipse(1, 1, r * squish, r * 0.65, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.scale(squish, 1);
+
+  const grad = ctx.createRadialGradient(-r * 0.2, -r * 0.2, 0, 0, 0, r);
+  grad.addColorStop(0, '#F5D060');
+  grad.addColorStop(0.4, P.GOLD);
+  grad.addColorStop(1, '#8B6914');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#B8860B';
+  ctx.beginPath();
+  ctx.arc(0, 0, r * 0.65, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (squish > 0.5) {
+    ctx.fillStyle = P.GOLD_LT;
+    ctx.font = `bold ${Math.floor(r * 1.1)}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('$', 0, 0);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.beginPath();
+    ctx.arc(-r * 0.25, -r * 0.3, r * 0.25, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
 // ─── Vignette ─────────────────────────────────────────────────────────────────
 function drawVignette(ctx, W, H) {
   const grad = ctx.createRadialGradient(W / 2, H / 2, H * 0.25, W / 2, H / 2, H * 0.85);
@@ -147,13 +202,12 @@ export function drawMaze(ctx, maze, doorOverlays, floorNum = 1) {
         ctx.strokeRect(x + 1, y + 1, S - 2, S - 2);
       } else if (cell === STASH) {
         _drawFloor(ctx, x, y, S, row, col, floorOffset, floorNum);
-        // Sparkle stash indicator
-        ctx.fillStyle = P.GOLD_LT;
+        // Glow aura
+        ctx.fillStyle = 'rgba(212,160,23,0.15)';
         ctx.beginPath();
-        ctx.arc(x + S / 2, y + S / 2, 3, 0, Math.PI * 2);
+        ctx.arc(x + S / 2, y + S / 2, 9, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = P.WHITE;
-        ctx.fillRect(x + S / 2 - 1, y + S / 2 - 1, 2, 2);
+        _drawCoin(ctx, x + S / 2, y + S / 2, 6, 0);
       } else if (cell === LIFT) {
         ctx.fillStyle = P.WALL_MID;
         ctx.fillRect(x, y, S, S);
@@ -494,16 +548,8 @@ export function drawParticles(ctx, particles) {
       // Money removal particle (red/orange)
       ctx.fillStyle = P.RED;
       ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
-    } else {
-      // Coin spin: 4 frames
-      ctx.fillStyle = p.frame === 0 || p.frame === 2 ? P.GOLD : P.GOLD_LT;
-      const w = p.frame === 0 ? 4 : p.frame === 2 ? 4 : p.frame === 1 ? 3 : 1;
-      ctx.fillRect(p.x - w / 2, p.y - 2, w, 4);
-      // Glint on frame 0
-      if (p.frame === 0) {
-        ctx.fillStyle = P.WHITE;
-        ctx.fillRect(p.x + 1, p.y - 2, 1, 1);
-      }
+    } else if (p.type === 'coin') {
+      _drawCoin(ctx, p.x, p.y, 5, p.frame);
     }
   });
   ctx.globalAlpha = 1;
@@ -511,10 +557,11 @@ export function drawParticles(ctx, particles) {
 
 // ─── HUD ──────────────────────────────────────────────────────────────────────
 export function drawHUD(ctx, state, W, H, showFloor = true) {
-  // Money badge
-  const moneyText = `$${Math.floor(state.displayMoney)}`;
+  // Money badge with coin icon
+  const moneyText = `${Math.floor(state.displayMoney)}`;
   ctx.font = 'bold 8px monospace';
-  const mw = ctx.measureText(moneyText).width + 10;
+  const coinW = 10;
+  const mw = ctx.measureText(moneyText).width + 10 + coinW;
   ctx.fillStyle = P.NAVY;
   _roundRect(ctx, 2, 2, mw, 12, 2);
   ctx.fill();
@@ -522,10 +569,30 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
   ctx.lineWidth = 1.5;
   _roundRect(ctx, 2, 2, mw, 12, 2);
   ctx.stroke();
+  _drawCoin(ctx, 9, 8, 4, 0);
   ctx.fillStyle = P.CREAM;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  ctx.fillText(moneyText, 7, 8);
+  ctx.fillText(moneyText, 9 + 5, 8);
+
+  // Inflation badge (right side, next to mute)
+  const inflText2 = state.inflationEnabled !== false ? 'INFL ON' : 'INFL OFF';
+  ctx.font = '7px monospace';
+  const inflW2 = ctx.measureText(inflText2).width + 8;
+  const muteText2 = isMuted() ? '[M]OFF' : '[M]ON';
+  const muteW2 = ctx.measureText(muteText2).width + 8;
+  const inflX2 = W - muteW2 - 4 - inflW2;
+  ctx.fillStyle = state.inflationEnabled !== false ? P.BURGUNDY : P.WALL_MID;
+  _roundRect(ctx, inflX2, 2, inflW2, 12, 2);
+  ctx.fill();
+  ctx.strokeStyle = state.inflationEnabled !== false ? P.RED : P.WALL_LT;
+  ctx.lineWidth = 1;
+  _roundRect(ctx, inflX2, 2, inflW2, 12, 2);
+  ctx.stroke();
+  ctx.fillStyle = state.inflationEnabled !== false ? P.CREAM : P.CREAM_DK;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(inflText2, inflX2 + inflW2 / 2, 8);
 
   // Floor badge (hotel room number plate style)
   if (showFloor) {
@@ -545,18 +612,16 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
 
   // Mute badge
   ctx.font = '7px monospace';
-  const muteText = isMuted() ? '[M]OFF' : '[M]ON';
-  const muteW = ctx.measureText(muteText).width + 8;
   ctx.fillStyle = P.NAVY;
-  _roundRect(ctx, W - muteW - 2, 2, muteW, 12, 2);
+  _roundRect(ctx, W - muteW2 - 2, 2, muteW2, 12, 2);
   ctx.fill();
   ctx.strokeStyle = P.WALL_MID;
   ctx.lineWidth = 1;
-  _roundRect(ctx, W - muteW - 2, 2, muteW, 12, 2);
+  _roundRect(ctx, W - muteW2 - 2, 2, muteW2, 12, 2);
   ctx.stroke();
   ctx.fillStyle = P.CREAM_DK;
   ctx.textAlign = 'right';
-  ctx.fillText(muteText, W - 6, 8);
+  ctx.fillText(muteText2, W - 6, 8);
 
   // Combo badge
   if (state.streak >= 2) {
