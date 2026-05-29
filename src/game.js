@@ -89,9 +89,17 @@ function defaultState() {
     paused: false,
     clearAnimTimer: 0,
 
+    // Title splash
+    titleSplashTimer: 0,
+
     // Floor states (for preserving resolved doors when going back down)
     floorStates: {},
   };
+}
+
+// ─── Title Splash ─────────────────────────────────────────────────────────────
+function triggerTitleSplash() {
+  state.titleSplashTimer = 2500;
 }
 
 const state = defaultState();
@@ -150,6 +158,7 @@ function loadFloor(floorNum) {
 }
 
 loadFloor(state.currentFloor);
+triggerTitleSplash();
 
 // ─── Audio init (requires user gesture) ──────────────────────────────────────
 let audioReady = false;
@@ -397,6 +406,12 @@ function activateBuildSelection() {
 let lastTime = 0;
 
 function update(dt) {
+  // Title splash timer
+  if (state.titleSplashTimer > 0) {
+    state.titleSplashTimer -= dt;
+    return;  // freeze gameplay during splash
+  }
+
   // Pause toggle
   if (consumeSpacePress()) {
     if (state.ui === 'game' || state.ui === 'pause') {
@@ -556,6 +571,23 @@ function render() {
   }
 
   if (state.ui === 'pause') drawPauseOverlay(ctx, LW, LH);
+
+  // Title splash
+  if (state.titleSplashTimer > 0) {
+    const t = Math.min(1, state.titleSplashTimer / 800);
+    ctx.globalAlpha = t;
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.fillRect(0, 0, LW, LH);
+    ctx.fillStyle = '#f5c842';
+    ctx.font = 'bold 14px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('GRAND HOTEL GOLD', LW / 2, LH / 2 - 8);
+    ctx.fillStyle = '#fff8e7';
+    ctx.font = '8px monospace';
+    ctx.fillText('a math maze adventure', LW / 2, LH / 2 + 8);
+    ctx.globalAlpha = 1;
+  }
 
   drawVignetteOverlay(ctx, LW, LH);
 }

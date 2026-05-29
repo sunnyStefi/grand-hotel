@@ -164,7 +164,7 @@ function _drawCoin(ctx, cx, cy, r, frame) {
 function drawVignette(ctx, W, H) {
   const grad = ctx.createRadialGradient(W / 2, H / 2, H * 0.25, W / 2, H / 2, H * 0.85);
   grad.addColorStop(0, 'rgba(0,0,0,0)');
-  grad.addColorStop(1, 'rgba(0,0,0,0.5)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.2)');
   ctx.globalAlpha = 1;
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
@@ -338,40 +338,24 @@ function _drawFloor(ctx, x, y, S, row, col, offset, floorNum = 1) {
 }
 
 function _drawDoor(ctx, x, y, S, d, floorNum = 1) {
-  // Wood base
-  ctx.fillStyle = P.WOOD_DARK;
+  // Cream door frame (extends to cell edges)
+  ctx.fillStyle = '#E8DCC0';
   ctx.fillRect(x, y, S, S);
-  // Wood grain lines
+
+  // Door body (dark wood, inset from frame)
+  ctx.fillStyle = P.WOOD_DARK;
+  ctx.fillRect(x + 1, y + 1, S - 2, S - 2);
+
+  // Decorative top arch
   ctx.fillStyle = P.WOOD_MID;
-  for (let gx = 2; gx < S; gx += 3) {
-    ctx.fillRect(x + gx, y + 1, 1, S - 2);
-  }
-  // Left highlight
-  ctx.fillStyle = P.WOOD_LT;
-  ctx.fillRect(x, y, 2, S);
+  ctx.fillRect(x + 3, y + 2, S - 6, 2);
+
   // Gold frame border
   ctx.strokeStyle = P.GOLD;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 1.5;
   ctx.strokeRect(x + 1, y + 1, S - 2, S - 2);
-  // Gold door knob (right side, middle)
-  ctx.fillStyle = P.GOLD_LT;
-  ctx.fillRect(x + S - 4, y + S / 2 - 2, 2, 3);
-  ctx.fillStyle = P.GOLD;
-  ctx.fillRect(x + S - 5, y + S / 2 - 1, 2, 2);
 
-  // Wrong answer flash: red X
-  if (d.flash > 0) {
-    ctx.fillStyle = P.RED;
-    ctx.globalAlpha = Math.min(1, d.flash / 150);
-    // X diagonal 1
-    for (let i = 0; i < S - 4; i++) {
-      ctx.fillRect(x + 2 + i, y + 2 + i, 2, 2);
-      ctx.fillRect(x + S - 4 - i, y + 2 + i, 2, 2);
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  // Answer value badge — color per floor theme
+  // Answer value badge — upper portion of door
   const floorMod = (floorNum - 1) % 4;
   const badgeColors = ['#4A2410', '#1F5A54', '#3A6BA2', '#5A3F6C'];
   const badgeColor = badgeColors[floorMod];
@@ -380,9 +364,9 @@ function _drawDoor(ctx, x, y, S, d, floorNum = 1) {
   ctx.font = 'bold 9px monospace';
   const tw = ctx.measureText(text).width;
   const bw = tw + 6;
-  const bh = 11;
+  const bh = 9;
   const bx = x + S / 2 - bw / 2;
-  const by = y + (S - bh) / 2;
+  const by = y + 2;
   ctx.fillStyle = badgeColor;
   _roundRect(ctx, bx, by, bw, bh, 2);
   ctx.fill();
@@ -390,10 +374,31 @@ function _drawDoor(ctx, x, y, S, d, floorNum = 1) {
   ctx.lineWidth = 1;
   _roundRect(ctx, bx, by, bw, bh, 2);
   ctx.stroke();
-  ctx.fillStyle = P.GOLD_LT;
+  ctx.fillStyle = '#FFFFFF';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(text, x + S / 2, by + bh / 2);
+
+  // Door handle — horizontal pull bar below the badge
+  ctx.fillStyle = P.WOOD_LT;
+  ctx.fillRect(x + S / 2 - 4, y + 12, 8, 3);
+  ctx.fillStyle = P.GOLD;
+  ctx.fillRect(x + S / 2 - 4, y + 12, 8, 2);
+  ctx.fillStyle = P.GOLD_LT;
+  ctx.fillRect(x + S / 2 - 3, y + 13, 6, 1);
+  ctx.fillStyle = '#FFE88C';
+  ctx.fillRect(x + S / 2 - 2, y + 13, 2, 1);
+
+  // Wrong answer flash: red X
+  if (d.flash > 0) {
+    ctx.fillStyle = P.RED;
+    ctx.globalAlpha = Math.min(1, d.flash / 150);
+    for (let i = 0; i < S - 4; i++) {
+      ctx.fillRect(x + 2 + i, y + 2 + i, 2, 2);
+      ctx.fillRect(x + S - 4 - i, y + 2 + i, 2, 2);
+    }
+    ctx.globalAlpha = 1;
+  }
 }
 
 function _roundRect(ctx, x, y, w, h, r) {
@@ -458,7 +463,7 @@ export function drawSumBanner(ctx, junction, sum, maze, floorNum = 1) {
   ctx.stroke();
 
   // Text
-  ctx.fillStyle = P.GOLD_LT;
+  ctx.fillStyle = '#FFFFFF';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(text, cx, cy);
@@ -565,8 +570,8 @@ export function drawParticles(ctx, particles) {
 export function drawHUD(ctx, state, W, H, showFloor = true) {
   // Money badge with coin icon
   const moneyText = `${Math.floor(state.displayMoney)}`;
-  ctx.font = 'bold 8px monospace';
-  const coinW = 10;
+  ctx.font = 'bold 9px monospace';
+  const coinW = 11;
   const mw = ctx.measureText(moneyText).width + 10 + coinW;
   ctx.fillStyle = P.NAVY;
   _roundRect(ctx, 2, 2, mw, 12, 2);
@@ -576,10 +581,10 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
   _roundRect(ctx, 2, 2, mw, 12, 2);
   ctx.stroke();
   _drawCoin(ctx, 9, 8, 4, 0);
-  ctx.fillStyle = P.CREAM;
+  ctx.fillStyle = '#FFFFFF';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  ctx.fillText(moneyText, 9 + 5, 8);
+  ctx.fillText(moneyText, 9 + 6, 8);
 
   // Inflation badge (right side, next to mute)
   const inflText2 = state.inflationEnabled !== false ? 'INFL ON' : 'INFL OFF';
@@ -595,7 +600,7 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
   ctx.lineWidth = 1;
   _roundRect(ctx, inflX2, 2, inflW2, 12, 2);
   ctx.stroke();
-  ctx.fillStyle = state.inflationEnabled !== false ? P.CREAM : P.CREAM_DK;
+  ctx.fillStyle = state.inflationEnabled !== false ? '#FFFFFF' : P.CREAM_DK;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(inflText2, inflX2 + inflW2 / 2, 8);
@@ -603,6 +608,7 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
   // Floor badge (hotel room number plate style)
   if (showFloor) {
     const floorText = `FLOOR ${state.currentFloor}`;
+    ctx.font = 'bold 9px monospace';
     const fw = ctx.measureText(floorText).width + 10;
     ctx.fillStyle = P.WOOD_MID;
     _roundRect(ctx, W / 2 - fw / 2, 2, fw, 12, 2);
@@ -611,9 +617,13 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
     ctx.lineWidth = 1.5;
     _roundRect(ctx, W / 2 - fw / 2, 2, fw, 12, 2);
     ctx.stroke();
-    ctx.fillStyle = P.GOLD_LT;
+    ctx.fillStyle = '#FFFFFF';
     ctx.textAlign = 'center';
     ctx.fillText(floorText, W / 2, 8);
+    // Subtitle
+    ctx.fillStyle = 'rgba(245,200,66,0.6)';
+    ctx.font = '5px monospace';
+    ctx.fillText('GRAND HOTEL GOLD', W / 2, 16);
   }
 
   // Mute badge
@@ -633,7 +643,7 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
   if (state.streak >= 2) {
     const mult = state.streak >= 4 ? 2.5 : state.streak === 3 ? 2.0 : 1.5;
     const comboText = `×${mult} COMBO`;
-    ctx.font = 'bold 8px monospace';
+    ctx.font = 'bold 9px monospace';
     const cw = ctx.measureText(comboText).width + 10;
     ctx.fillStyle = P.BURGUNDY;
     _roundRect(ctx, 2, H - 14, cw, 12, 2);
@@ -648,7 +658,7 @@ export function drawHUD(ctx, state, W, H, showFloor = true) {
     ctx.lineWidth = 0.5;
     _roundRect(ctx, 4, H - 12, cw - 4, 8, 1);
     ctx.stroke();
-    ctx.fillStyle = P.CREAM;
+    ctx.fillStyle = '#FFFFFF';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText(comboText, 7, H - 8);
